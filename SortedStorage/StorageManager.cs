@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace SortedStorage
 {
@@ -20,6 +18,7 @@ namespace SortedStorage
 
         public void Add(TKey key, TValue value)
         {
+            // TODO: rethink concurrency....
             lock(mainMemtable)
             {
                 if (mainMemtable.IsFull())
@@ -33,8 +32,8 @@ namespace SortedStorage
 
         private void StoreMainMemtable()
         {
-            // ISSUE: If main memtable gets full before finishing to create sstable from transfer memtable
-            // we are going to have problems... (must define which kink of problem)
+            // TODO: if main memtable gets full before finishing to create sstable from transfer memtable
+            // we are going to have problems... (must define which kind of problem)
             transferMemtable = mainMemtable;
             mainMemtable = new Memtable<TKey, TValue>();
 

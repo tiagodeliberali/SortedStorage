@@ -1,24 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace SortedStorage
 {
     class Memtable<TKey, TValue>
     {
-        internal bool IsFull()
-        {
-            return false;
-        }
+        private const int MAX_SIZE = 3;
+        private readonly SortedDictionary<TKey, TValue> sortedDictionary = new SortedDictionary<TKey, TValue>();
 
-        internal void Add(TKey key, TValue value)
-        {
-            throw new NotImplementedException();
-        }
+        internal bool IsFull() => sortedDictionary.Count > MAX_SIZE;
 
-        internal TValue Get(TKey key)
-        {
-            throw new NotImplementedException();
-        }
+        internal void Add(TKey key, TValue value) => sortedDictionary.Add(key, value);
+
+        internal TValue Get(TKey key) => sortedDictionary.GetValueOrDefault(key);
     }
 }
