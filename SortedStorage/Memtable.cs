@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace SortedStorage
 {
@@ -8,34 +7,23 @@ namespace SortedStorage
     {
         private const int MAX_SIZE = 3;
         private readonly SortedDictionary<string, string> sortedDictionary = new SortedDictionary<string, string>();
-        private readonly FileStream file;
+        private readonly IFilePort filePort;
 
-        public Memtable(string basePath)
-        {
-            string path = Path.Combine(basePath, $"{Guid.NewGuid()}.dat");
-            file = new FileStream(path, FileMode.Append, FileAccess.Write);
-        }
+        public Memtable(IFilePort filePort) => this.filePort = filePort;
 
         internal bool IsFull() => sortedDictionary.Count > MAX_SIZE;
 
         internal void Add(string key, string value)
         {
-            AppendToFile(key, value);
+            filePort.Append(KeyValueRegister.ToBytes(key, value));
             sortedDictionary.Add(key, value);
-        }
-
-        private void AppendToFile(string key, string value)
-        {
-            var keyValue = KeyValueRegister.ToBytes(key, value);
-            file.Write(keyValue, 0, keyValue.Length);
-            file.Flush();
         }
 
         internal string Get(string key) => sortedDictionary.GetValueOrDefault(key);
 
         public void Dispose()
         {
-            if (file != null) file.Dispose();
+            if (filePort != null) filePort.Dispose();
         }
     }
 }

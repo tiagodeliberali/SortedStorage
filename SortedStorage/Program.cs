@@ -9,7 +9,9 @@ namespace SortedStorage
         static void Main(string[] args)
         {
             string path = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-            var storage = new StorageManager(path);
+
+            FileAdapter fileAdapter = new FileAdapter(path);
+            var storage = new StorageManager(fileAdapter);
 
             Console.WriteLine("LSM DB\n------");
             Console.WriteLine($"\nrunnung at {path}");

@@ -4,16 +4,16 @@ namespace SortedStorage
 {
     public class StorageManager
     {
-        private readonly string basePath;
+        private readonly IFilePort filePort;
         private Memtable mainMemtable;
         private Memtable transferMemtable;
         private LinkedList<SSTable> sstables;
 
-        public StorageManager(string basePath)
+        public StorageManager(IFilePort filePort)
         {
-            this.basePath = basePath;
+            this.filePort = filePort;
 
-            mainMemtable = new Memtable(basePath);
+            mainMemtable = new Memtable(filePort);
             sstables = new LinkedList<SSTable>();
         }
 
@@ -36,33 +36,23 @@ namespace SortedStorage
             // TODO: if main memtable gets full before finishing to create sstable from transfer memtable
             // we are going to have problems... (must define which kind of problem)
             transferMemtable = mainMemtable;
-            mainMemtable = new Memtable(basePath);
+            mainMemtable = new Memtable(filePort);
 
             // start a new thread to transform transfer memtable to a sstable
         }
 
         public string Get(string key)
         {
-            string result = mainMemtable.Get(key);
+            return mainMemtable.Get(key)
+                ?? transferMemtable?.Get(key)
+                ?? GetFromSSTables(key);
+        }
 
-            if (result != null)
-            {
-                return result;
-            }
-
-            if (transferMemtable != null)
-            {
-                result = transferMemtable.Get(key);
-
-                if (result != null)
-                {
-                    return result;
-                }
-            }
-
+        private string GetFromSSTables(string key)
+        {
             foreach (var table in sstables)
             {
-                result = table.Get(key);
+                string result = table.Get(key);
 
                 if (result != null)
                 {
