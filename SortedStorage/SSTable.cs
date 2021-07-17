@@ -2,8 +2,8 @@
 
 namespace SortedStorage
 {
-    class SSTable<TKey, TValue>
+    class SSTable
     {
-        internal TValue Get(TKey key) => throw new NotImplementedException();
+        internal string Get(string key) => throw new NotImplementedException();
     }
 }

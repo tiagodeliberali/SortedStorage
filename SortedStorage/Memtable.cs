@@ -2,15 +2,15 @@
 
 namespace SortedStorage
 {
-    class Memtable<TKey, TValue>
+    class Memtable
     {
         private const int MAX_SIZE = 3;
-        private readonly SortedDictionary<TKey, TValue> sortedDictionary = new SortedDictionary<TKey, TValue>();
+        private readonly SortedDictionary<string, string> sortedDictionary = new SortedDictionary<string, string>();
 
         internal bool IsFull() => sortedDictionary.Count > MAX_SIZE;
 
-        internal void Add(TKey key, TValue value) => sortedDictionary.Add(key, value);
+        internal void Add(string key, string value) => sortedDictionary.Add(key, value);
 
-        internal TValue Get(TKey key) => sortedDictionary.GetValueOrDefault(key);
+        internal string Get(string key) => sortedDictionary.GetValueOrDefault(key);
     }
 }

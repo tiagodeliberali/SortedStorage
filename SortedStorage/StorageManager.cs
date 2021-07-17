@@ -2,24 +2,23 @@
 
 namespace SortedStorage
 {
-    public class StorageManager<TKey, TValue>
-        where TValue: class
+    public class StorageManager
     {
-        private Memtable<TKey, TValue> mainMemtable;
-        private Memtable<TKey, TValue> transferMemtable;
-        private LinkedList<SSTable<TKey, TValue>> sstables;
+        private Memtable mainMemtable;
+        private Memtable transferMemtable;
+        private LinkedList<SSTable> sstables;
 
         public StorageManager()
         {
-            mainMemtable = new Memtable<TKey, TValue>();
-            transferMemtable = new Memtable<TKey, TValue>();
-            sstables = new LinkedList<SSTable<TKey, TValue>>();
+            mainMemtable = new Memtable();
+            transferMemtable = new Memtable();
+            sstables = new LinkedList<SSTable>();
         }
 
-        public void Add(TKey key, TValue value)
+        public void Add(string key, string value)
         {
             // TODO: rethink concurrency....
-            lock(mainMemtable)
+            lock (mainMemtable)
             {
                 if (mainMemtable.IsFull())
                 {
@@ -35,21 +34,22 @@ namespace SortedStorage
             // TODO: if main memtable gets full before finishing to create sstable from transfer memtable
             // we are going to have problems... (must define which kind of problem)
             transferMemtable = mainMemtable;
-            mainMemtable = new Memtable<TKey, TValue>();
+            mainMemtable = new Memtable();
 
             // start a new thread to transform transfer memtable to a sstable
         }
 
-        public TValue Get(TKey key)
+        public string Get(string key)
         {
-            TValue result = mainMemtable.Get(key);
+            string result = mainMemtable.Get(key);
 
             if (result != null)
             {
                 return result;
             }
 
-            if (transferMemtable != null) {
+            if (transferMemtable != null)
+            {
                 result = transferMemtable.Get(key);
 
                 if (result != null)

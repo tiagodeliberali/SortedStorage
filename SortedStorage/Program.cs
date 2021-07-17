@@ -6,7 +6,7 @@ namespace SortedStorage
     {
         static void Main(string[] args)
         {
-            var storage = new StorageManager<string, string>();
+            var storage = new StorageManager();
 
             Console.WriteLine("LSM DB\n------");
 
