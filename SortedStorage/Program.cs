@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
 
 namespace SortedStorage
 {
@@ -6,11 +8,13 @@ namespace SortedStorage
     {
         static void Main(string[] args)
         {
-            var storage = new StorageManager();
+            string path = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            var storage = new StorageManager(path);
 
             Console.WriteLine("LSM DB\n------");
+            Console.WriteLine($"\nrunnung at {path}");
 
-            while(true)
+            while (true)
             {
                 Console.WriteLine("[a (add), g (get), q (quit)]>");
                 string action = Console.ReadLine();
