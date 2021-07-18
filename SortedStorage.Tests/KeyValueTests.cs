@@ -10,7 +10,7 @@ namespace SortedStorage.Tests
         [Fact]
         public void keyvalue_should_build_byte_array()
         {
-            KeyValueRegister keyValue = new KeyValueRegister("key", "value");
+            KeyValueEntry keyValue = new KeyValueEntry("key", "value");
 
             byte[] data = keyValue.ToBytes();
 

@@ -4,25 +4,25 @@ using System.IO;
 
 namespace SortedStorage.Adapter.Out
 {
-    public class FileAdapter : IFilePort
+    public class FileWriterAdapter : IFileWritePort
     {
         private readonly FileStream file;
 
-        public FileAdapter(string basePath)
+        public FileWriterAdapter(string path)
         {
-            string path = Path.Combine(basePath, $"{Guid.NewGuid()}.dat");
             file = new FileStream(path, FileMode.Append, FileAccess.Write);
         }
 
-        public void Append(byte[] keyValue)
+        public long Append(byte[] keyValue)
         {
+            long position = file.Seek(0, SeekOrigin.End);
+
             file.Write(keyValue, 0, keyValue.Length);
             file.Flush();
+
+            return position;
         }
 
-        public void Dispose()
-        {
-            if (file != null) file.Dispose();
-        }
+        public void Dispose() => file?.Dispose();
     }
 }

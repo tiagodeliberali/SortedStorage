@@ -1,6 +1,7 @@
 ﻿using SortedStorage.Application.Port.Out;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SortedStorage.Application
 {
@@ -8,23 +9,22 @@ namespace SortedStorage.Application
     {
         private const int MAX_SIZE = 3;
         private readonly SortedDictionary<string, string> sortedDictionary = new SortedDictionary<string, string>();
-        private readonly IFilePort filePort;
+        private readonly IFileWritePort filePort;
 
-        public Memtable(IFilePort filePort) => this.filePort = filePort;
+        public Memtable(IFileWritePort filePort) => this.filePort = filePort;
 
-        internal bool IsFull() => sortedDictionary.Count >= MAX_SIZE;
+        public bool IsFull() => sortedDictionary.Count >= MAX_SIZE;
 
-        internal void Add(string key, string value)
+        public void Add(string key, string value)
         {
-            filePort.Append(KeyValueRegister.ToBytes(key, value));
+            filePort.Append(KeyValueEntry.ToBytes(key, value));
             sortedDictionary.Add(key, value);
         }
 
-        internal string Get(string key) => sortedDictionary.GetValueOrDefault(key);
+        public IEnumerable<KeyValuePair<string, string>> GetData() => sortedDictionary.AsEnumerable();
 
-        public void Dispose()
-        {
-            if (filePort != null) filePort.Dispose();
-        }
+        public string Get(string key) => sortedDictionary.GetValueOrDefault(key);
+
+        public void Dispose() => filePort?.Dispose();
     }
 }

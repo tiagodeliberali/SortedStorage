@@ -4,20 +4,20 @@ using System.Text;
 
 namespace SortedStorage.Application
 {
-    public class KeyValueRegister
+    public class KeyValueEntry
     {
-        public KeyValueRegister(string key, string value)
+        public KeyValueEntry(string key, string value)
         {
             Key = key;
             Value = value;
         }
 
-        public string Key { get; private set; }
-        public string Value { get; private set; }
+        public string Key { get; }
+        public string Value { get; }
 
         public override bool Equals(object obj)
         {
-            return obj is KeyValueRegister register
+            return obj is KeyValueEntry register
                     && Key == register.Key
                     && Value == register.Value;
         }
@@ -45,7 +45,7 @@ namespace SortedStorage.Application
 
         public static byte[] ToBytes(string key, string value)
         {
-            var keyValue = new KeyValueRegister(key, value);
+            var keyValue = new KeyValueEntry(key, value);
             return keyValue.ToBytes();
         }
     }

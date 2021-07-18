@@ -11,7 +11,7 @@ namespace SortedStorage
         static void Main(string[] args)
         {
             string path = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-            FileAdapter fileAdapter = new FileAdapter(path);
+            FileManagerAdapter fileAdapter = new FileManagerAdapter(path);
 
             var storage = new StorageService(fileAdapter);
 
