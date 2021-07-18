@@ -38,8 +38,6 @@ namespace SortedStorage.Application
                 foreach (var keyValue in memtable.GetData())
                 {
                     long position = dataFile.Append(KeyValueEntry.ToBytes(keyValue.Key, keyValue.Value));
-
-                    // TODO: Why seek returns a long and read onsumes an int?
                     index.Add(keyValue.Key, position);
                     indexFile.Append(IndexEntry.ToBytes(keyValue.Key, position));
                 }

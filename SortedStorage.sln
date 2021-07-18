@@ -10,7 +10,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SortedStorage.Tests", "SortedStorage.Tests\SortedStorage.Tests.csproj", "{64DEEC2B-AA70-4FDE-99A0-6D4614BD5354}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SortedStorage.Tests", "SortedStorage.Tests\SortedStorage.Tests.csproj", "{64DEEC2B-AA70-4FDE-99A0-6D4614BD5354}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SortedStorage.Application", "SortedStorage.Application\SortedStorage.Application.csproj", "{987D7105-DDA9-4827-BC28-3C671030E723}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +28,10 @@ Global
 		{64DEEC2B-AA70-4FDE-99A0-6D4614BD5354}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{64DEEC2B-AA70-4FDE-99A0-6D4614BD5354}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{64DEEC2B-AA70-4FDE-99A0-6D4614BD5354}.Release|Any CPU.Build.0 = Release|Any CPU
+		{987D7105-DDA9-4827-BC28-3C671030E723}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{987D7105-DDA9-4827-BC28-3C671030E723}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{987D7105-DDA9-4827-BC28-3C671030E723}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{987D7105-DDA9-4827-BC28-3C671030E723}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

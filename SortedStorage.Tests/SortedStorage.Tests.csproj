@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SortedStorage\SortedStorage.csproj" />
+    <ProjectReference Include="..\SortedStorage.Application\SortedStorage.Application.csproj" />
   </ItemGroup>
 
 </Project>
