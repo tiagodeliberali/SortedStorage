@@ -2,18 +2,24 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SortedStorage
+namespace SortedStorage.Application
 {
     class KeyValueRegister
     {
+        public KeyValueRegister(string key, string value)
+        {
+            Key = key;
+            Value = value;
+        }
+
         public string Key { get; private set; }
         public string Value { get; private set; }
 
         public override bool Equals(object obj)
         {
-            return obj is KeyValueRegister register &&
-                   Key == register.Key &&
-                   Value == register.Value;
+            return obj is KeyValueRegister register
+                    && Key == register.Key
+                    && Value == register.Value;
         }
 
         public override int GetHashCode()
@@ -24,7 +30,7 @@ namespace SortedStorage
         internal byte[] ToBytes()
         {
             List<byte> data = new List<byte>();
-            
+
             // TOOD: validate if it is good enough to be a validation checksum
             data.AddRange(BitConverter.GetBytes(GetHashCode()));
 
@@ -39,12 +45,7 @@ namespace SortedStorage
 
         internal static byte[] ToBytes(string key, string value)
         {
-            var keyValue = new KeyValueRegister()
-            {
-                Key = key,
-                Value = value
-            };
-
+            var keyValue = new KeyValueRegister(key, value);
             return keyValue.ToBytes();
         }
     }

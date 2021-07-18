@@ -1,7 +1,8 @@
-﻿using System;
+﻿using SortedStorage.Application.Port.Out;
+using System;
 using System.IO;
 
-namespace SortedStorage
+namespace SortedStorage.Adapter.Out
 {
     public class FileAdapter : IFilePort
     {

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SortedStorage.Adapter.Out;
+using SortedStorage.Application;
+using System;
 using System.IO;
 using System.Reflection;
 
@@ -11,7 +13,7 @@ namespace SortedStorage
             string path = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
             FileAdapter fileAdapter = new FileAdapter(path);
-            var storage = new StorageManager(fileAdapter);
+            var storage = new StorageService(fileAdapter);
 
             Console.WriteLine("LSM DB\n------");
             Console.WriteLine($"\nrunnung at {path}");
@@ -40,7 +42,7 @@ namespace SortedStorage
                     if (result == null)
                     {
                         Console.WriteLine("no data found");
-                    } 
+                    }
                     else
                     {
                         Console.WriteLine(result);

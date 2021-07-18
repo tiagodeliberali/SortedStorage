@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SortedStorage
+namespace SortedStorage.Application.Port.Out
 {
     public interface IFilePort : IDisposable
     {

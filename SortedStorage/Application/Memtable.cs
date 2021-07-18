@@ -1,7 +1,8 @@
-﻿using System;
+﻿using SortedStorage.Application.Port.Out;
+using System;
 using System.Collections.Generic;
 
-namespace SortedStorage
+namespace SortedStorage.Application
 {
     class Memtable : IDisposable
     {
@@ -11,7 +12,7 @@ namespace SortedStorage
 
         public Memtable(IFilePort filePort) => this.filePort = filePort;
 
-        internal bool IsFull() => sortedDictionary.Count > MAX_SIZE;
+        internal bool IsFull() => sortedDictionary.Count >= MAX_SIZE;
 
         internal void Add(string key, string value)
         {

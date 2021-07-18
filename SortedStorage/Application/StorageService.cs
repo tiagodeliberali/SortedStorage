@@ -1,15 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using SortedStorage.Application.Port.Out;
+using System.Collections.Generic;
 
-namespace SortedStorage
+namespace SortedStorage.Application
 {
-    public class StorageManager
+    public class StorageService
     {
         private readonly IFilePort filePort;
         private Memtable mainMemtable;
         private Memtable transferMemtable;
         private LinkedList<SSTable> sstables;
 
-        public StorageManager(IFilePort filePort)
+        public StorageService(IFilePort filePort)
         {
             this.filePort = filePort;
 
