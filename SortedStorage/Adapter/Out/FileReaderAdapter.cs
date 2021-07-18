@@ -7,10 +7,7 @@ namespace SortedStorage.Adapter.Out
     {
         private readonly FileStream file;
 
-        public FileReaderAdapter(string path)
-        {
-            file = new FileStream(path, FileMode.Open, FileAccess.Read);
-        }
+        public FileReaderAdapter(string path) => file = new FileStream(path, FileMode.Open, FileAccess.Read);
 
         public byte[] Read(long position, int size)
         {

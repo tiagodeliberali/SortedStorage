@@ -7,10 +7,7 @@ namespace SortedStorage.Adapter.Out
     {
         private readonly FileStream file;
 
-        public FileWriterAdapter(string path)
-        {
-            file = new FileStream(path, FileMode.Append, FileAccess.Write);
-        }
+        public FileWriterAdapter(string path) => file = new FileStream(path, FileMode.Append, FileAccess.Write);
 
         public long Append(byte[] keyValue)
         {

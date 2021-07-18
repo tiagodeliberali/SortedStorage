@@ -46,12 +46,9 @@ namespace SortedStorage.Application
             transferMemtable = null;
         }
 
-        public string Get(string key)
-        {
-            return mainMemtable.Get(key)
+        public string Get(string key) => mainMemtable.Get(key)
                 ?? transferMemtable?.Get(key)
                 ?? GetFromSSTables(key);
-        }
 
         private string GetFromSSTables(string key)
         {

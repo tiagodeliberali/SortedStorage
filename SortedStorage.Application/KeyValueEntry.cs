@@ -23,10 +23,7 @@ namespace SortedStorage.Application
                     && Value == register.Value;
         }
 
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Key, Value);
-        }
+        public override int GetHashCode() => HashCode.Combine(Key, Value);
 
         public byte[] ToBytes()
         {
