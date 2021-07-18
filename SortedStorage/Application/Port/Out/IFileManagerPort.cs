@@ -2,7 +2,7 @@
 {
     public interface IFileManagerPort
     {
-        IFileReadPort OpenToRead(string name);
-        IFileWritePort OpenOrCreateToWrite(string name);
+        IFileReaderPort OpenToRead(string name);
+        IFileWriterPort OpenOrCreateToWrite(string name);
     }
 }

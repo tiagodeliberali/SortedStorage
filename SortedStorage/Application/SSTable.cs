@@ -1,47 +1,53 @@
 ﻿using SortedStorage.Application.Port.Out;
 using System;
+using System.Collections.Generic;
 
 namespace SortedStorage.Application
 {
     class SSTable : IDisposable
     {
-        private readonly IFileReadPort dataFile, indexFile;
+        private readonly IFileReaderPort dataFile;
+        private readonly Dictionary<string, long> index;
 
-        private SSTable(IFileReadPort dataFile, IFileReadPort indexFile)
+        private SSTable(IFileReaderPort dataFile, Dictionary<string, long> index)
         {
             this.dataFile = dataFile;
-            this.indexFile = indexFile;
+            this.index = index;
         }
 
-        public static SSTable Build(IFileReadPort dataFile, IFileReadPort indexFile)
+        internal string Get(string key)
         {
-            return new SSTable(dataFile, indexFile);
-        }
+            if (!index.ContainsKey(key)) return null;
 
-        internal string Get(string key) => throw new NotImplementedException();
+            var position = index[key];
+
+            var keyValue = KeyValueEntry.FromBytes(dataFile, position);
+
+            return keyValue.Value;
+        }
 
         internal static SSTable From(Memtable memtable, IFileManagerPort fileManager)
         {
             string filename = Guid.NewGuid().ToString();
+            Dictionary<string, long> index = new Dictionary<string, long>();
 
-            using (IFileWritePort dataFile = fileManager.OpenOrCreateToWrite($"{filename}.dat"))
-            using (IFileWritePort indexFile = fileManager.OpenOrCreateToWrite($"{filename}.idx"))
+            using (IFileWriterPort dataFile = fileManager.OpenOrCreateToWrite($"{filename}.dat"))
+            using (IFileWriterPort indexFile = fileManager.OpenOrCreateToWrite($"{filename}.idx"))
             {
 
                 foreach (var keyValue in memtable.GetData())
                 {
                     long position = dataFile.Append(KeyValueEntry.ToBytes(keyValue.Key, keyValue.Value));
+
+                    // TODO: Why seek returns a long and read onsumes an int?
+                    index.Add(keyValue.Key, position);
                     indexFile.Append(IndexEntry.ToBytes(keyValue.Key, position));
                 }
             }
 
-            return SSTable.Build(fileManager.OpenToRead($"{filename}.dat"), fileManager.OpenToRead($"{filename}.idx"));
+            return new SSTable(fileManager.OpenToRead($"{filename}.dat"), index);
         }
 
-        public void Dispose()
-        {
-            dataFile?.Dispose();
-            indexFile?.Dispose();
-        }
+        public void Dispose() => dataFile?.Dispose();
     }
 }

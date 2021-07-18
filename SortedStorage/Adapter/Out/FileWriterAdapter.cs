@@ -1,10 +1,9 @@
 ﻿using SortedStorage.Application.Port.Out;
-using System;
 using System.IO;
 
 namespace SortedStorage.Adapter.Out
 {
-    public class FileWriterAdapter : IFileWritePort
+    public class FileWriterAdapter : IFileWriterPort
     {
         private readonly FileStream file;
 

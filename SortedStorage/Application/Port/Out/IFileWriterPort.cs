@@ -2,7 +2,7 @@
 
 namespace SortedStorage.Application.Port.Out
 {
-    public interface IFileWritePort : IDisposable
+    public interface IFileWriterPort : IDisposable
     {
         long Append(byte[] keyValue);
     }

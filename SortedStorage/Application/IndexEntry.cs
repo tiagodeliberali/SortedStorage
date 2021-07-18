@@ -19,7 +19,10 @@ namespace SortedStorage.Application
         {
             List<byte> data = new List<byte>();
 
-            data.AddRange(Encoding.UTF8.GetBytes(Key));
+            byte[] keyData = Encoding.UTF8.GetBytes(Key);
+
+            data.AddRange(BitConverter.GetBytes(keyData.Length));
+            data.AddRange(keyData);
             data.AddRange(BitConverter.GetBytes(Position));
 
             return data.ToArray();

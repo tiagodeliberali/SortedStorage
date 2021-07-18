@@ -7,11 +7,11 @@ namespace SortedStorage.Application
 {
     class Memtable : IDisposable
     {
-        private const int MAX_SIZE = 3;
+        private const int MAX_SIZE = 2;
         private readonly SortedDictionary<string, string> sortedDictionary = new SortedDictionary<string, string>();
-        private readonly IFileWritePort filePort;
+        private readonly IFileWriterPort filePort;
 
-        public Memtable(IFileWritePort filePort) => this.filePort = filePort;
+        public Memtable(IFileWriterPort filePort) => this.filePort = filePort;
 
         public bool IsFull() => sortedDictionary.Count >= MAX_SIZE;
 

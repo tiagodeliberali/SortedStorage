@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SortedStorage.Application.Port.Out;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -34,11 +35,14 @@ namespace SortedStorage.Application
             // TODO: validate if it is good enough to be a validation checksum
             data.AddRange(BitConverter.GetBytes(GetHashCode()));
 
-            data.AddRange(BitConverter.GetBytes(Key.Length));
-            data.AddRange(BitConverter.GetBytes(Value.Length));
+            byte[] keydata = Encoding.UTF8.GetBytes(Key);
+            byte[] valueData = Encoding.UTF8.GetBytes(Value);
 
-            data.AddRange(Encoding.UTF8.GetBytes(Key));
-            data.AddRange(Encoding.UTF8.GetBytes(Value));
+            data.AddRange(BitConverter.GetBytes(keydata.Length));
+            data.AddRange(BitConverter.GetBytes(valueData.Length));
+
+            data.AddRange(keydata);
+            data.AddRange(valueData);
 
             return data.ToArray();
         }
@@ -47,6 +51,27 @@ namespace SortedStorage.Application
         {
             var keyValue = new KeyValueEntry(key, value);
             return keyValue.ToBytes();
+        }
+
+        public static KeyValueEntry FromBytes(IFileReaderPort file, long position)
+        {
+            byte[] header = file.Read(position, 12);
+
+            int checksum = BitConverter.ToInt32(header, 0);
+            int keySize = BitConverter.ToInt32(header, 4);
+            int valueSize = BitConverter.ToInt32(header, 8);
+
+            string keyData = Encoding.UTF8.GetString(file.Read(position + 12, keySize));
+            string valueData = Encoding.UTF8.GetString(file.Read(position + 12 + keySize, valueSize));
+
+            KeyValueEntry keyValue = new KeyValueEntry(keyData, valueData);
+
+            if (checksum != keyValue.GetHashCode())
+            {
+                throw new InvalidEntryParseException("Checksum not match");
+            }
+
+            return keyValue;
         }
     }
 }

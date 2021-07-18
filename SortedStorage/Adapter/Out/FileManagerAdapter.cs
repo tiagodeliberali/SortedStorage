@@ -12,12 +12,12 @@ namespace SortedStorage.Adapter.Out
             this.basePath = basePath;
         }
 
-        public IFileWritePort OpenOrCreateToWrite(string name)
+        public IFileWriterPort OpenOrCreateToWrite(string name)
         {
             return new FileWriterAdapter(Path.Combine(basePath, name));
         }
 
-        public IFileReadPort OpenToRead(string name)
+        public IFileReaderPort OpenToRead(string name)
         {
             return new FileReaderAdapter(Path.Combine(basePath, name));
         }
