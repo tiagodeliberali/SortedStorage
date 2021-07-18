@@ -11,8 +11,8 @@ namespace SortedStorage
         static void Main(string[] args)
         {
             string path = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-
             FileAdapter fileAdapter = new FileAdapter(path);
+
             var storage = new StorageService(fileAdapter);
 
             Console.WriteLine("LSM DB\n------");
@@ -28,15 +28,15 @@ namespace SortedStorage
                     break;
                 }
 
+                var data = action.Split(' ');
+
                 if (action.StartsWith("a"))
                 {
-                    var data = action.Split(' ');
                     storage.Add(data[1], data[2]);
                 }
 
                 if (action.StartsWith("g"))
                 {
-                    var data = action.Split(' ');
                     string result = storage.Get(data[1]);
 
                     if (result == null)

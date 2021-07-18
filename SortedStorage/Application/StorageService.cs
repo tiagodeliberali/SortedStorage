@@ -6,9 +6,9 @@ namespace SortedStorage.Application
     public class StorageService
     {
         private readonly IFilePort filePort;
+        private readonly LinkedList<SSTable> sstables;
         private Memtable mainMemtable;
         private Memtable transferMemtable;
-        private LinkedList<SSTable> sstables;
 
         public StorageService(IFilePort filePort)
         {
@@ -39,7 +39,7 @@ namespace SortedStorage.Application
             transferMemtable = mainMemtable;
             mainMemtable = new Memtable(filePort);
 
-            // start a new thread to transform transfer memtable to a sstable
+            // TODO: start a new thread to transform transfer memtable to a sstable
         }
 
         public string Get(string key)

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SortedStorage.Application
 {
-    class KeyValueRegister
+    public class KeyValueRegister
     {
         public KeyValueRegister(string key, string value)
         {
@@ -27,11 +27,11 @@ namespace SortedStorage.Application
             return HashCode.Combine(Key, Value);
         }
 
-        internal byte[] ToBytes()
+        public byte[] ToBytes()
         {
             List<byte> data = new List<byte>();
 
-            // TOOD: validate if it is good enough to be a validation checksum
+            // TODO: validate if it is good enough to be a validation checksum
             data.AddRange(BitConverter.GetBytes(GetHashCode()));
 
             data.AddRange(BitConverter.GetBytes(Key.Length));
@@ -43,7 +43,7 @@ namespace SortedStorage.Application
             return data.ToArray();
         }
 
-        internal static byte[] ToBytes(string key, string value)
+        public static byte[] ToBytes(string key, string value)
         {
             var keyValue = new KeyValueRegister(key, value);
             return keyValue.ToBytes();
