@@ -39,9 +39,8 @@ namespace SortedStorage.Application
 
         public SSTable Merge(SSTable otherTable, IFileManagerPort fileManager)
         {
-            // TODO: Replace by priority queue
-            var curEnumerator = GetAll().GetEnumerator();
-            var otherEnumerator = otherTable.GetAll().GetEnumerator();
+            PriorityEnumerator priorityEnumerator = new PriorityEnumerator(
+                new IEnumerable<KeyValuePair<string, string>>[] { otherTable.GetAll(), GetAll() });
 
             string filename = Guid.NewGuid().ToString();
             Dictionary<string, long> index = new Dictionary<string, long>();
@@ -49,42 +48,9 @@ namespace SortedStorage.Application
             using (IFileWriterPort dataFile = fileManager.OpenOrCreateToWrite($"{filename}.dat"))
             using (IFileWriterPort indexFile = fileManager.OpenOrCreateToWrite($"{filename}.idx"))
             {
-                KeyValuePair<string, string>? currentKeyValue = null, otherKeyValue = null;
-                if (currentKeyValue == null && curEnumerator.MoveNext()) currentKeyValue = curEnumerator.Current;
-                if (otherKeyValue == null && otherEnumerator.MoveNext()) otherKeyValue = otherEnumerator.Current;
-
-                while (currentKeyValue != null || otherKeyValue != null)
+                foreach (var item in priorityEnumerator.GetAll())
                 {
-                    KeyValuePair<string, string>? keyValue = null;
-
-                    if (currentKeyValue == null)
-                    {
-                        keyValue = otherKeyValue;
-                        otherKeyValue = null;
-                    }
-                    else if (otherKeyValue == null)
-                    {
-                        keyValue = currentKeyValue;
-                        currentKeyValue = null;
-                    }
-                    else
-                    {
-                        if (currentKeyValue.Value.Key.CompareTo(otherKeyValue.Value.Key) < 0)
-                        {
-                            keyValue = currentKeyValue;
-                            currentKeyValue = null;
-                        }
-                        else
-                        {
-                            keyValue = otherKeyValue;
-                            otherKeyValue = null;
-                        }
-                    }
-
-                    if (currentKeyValue == null && curEnumerator.MoveNext()) currentKeyValue = curEnumerator.Current;
-                    if (otherKeyValue == null && otherEnumerator.MoveNext()) otherKeyValue = otherEnumerator.Current;
-
-                    BuildFile(dataFile, indexFile, keyValue.Value, index);
+                    BuildFile(dataFile, indexFile, item, index);
                 }
             }
 
@@ -99,7 +65,6 @@ namespace SortedStorage.Application
             using (IFileWriterPort dataFile = fileManager.OpenOrCreateToWrite($"{filename}.dat"))
             using (IFileWriterPort indexFile = fileManager.OpenOrCreateToWrite($"{filename}.idx"))
             {
-
                 foreach (var keyValue in memtable.GetData())
                 {
                     BuildFile(dataFile, indexFile, keyValue, index);

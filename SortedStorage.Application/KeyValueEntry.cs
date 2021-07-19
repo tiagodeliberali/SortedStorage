@@ -29,7 +29,6 @@ namespace SortedStorage.Application
         {
             List<byte> data = new List<byte>();
 
-            // TODO: validate if it is good enough to be a validation checksum
             data.AddRange(BitConverter.GetBytes(GetHashCode()));
 
             byte[] keydata = Encoding.UTF8.GetBytes(Key);
