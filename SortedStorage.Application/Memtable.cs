@@ -25,6 +25,10 @@ namespace SortedStorage.Application
 
         public string Get(string key) => sortedDictionary.GetValueOrDefault(key);
 
+        public void Delete() => filePort?.Delete();
+
         public void Dispose() => filePort?.Dispose();
+
+        public string GetFileName() => filePort.GetName();
     }
 }

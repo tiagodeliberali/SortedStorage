@@ -5,9 +5,14 @@ namespace SortedStorage.Adapter.Out
 {
     public class FileWriterAdapter : IFileWriterPort
     {
+        private readonly string path;
         private readonly FileStream file;
 
-        public FileWriterAdapter(string path) => file = new FileStream(path, FileMode.Append, FileAccess.Write);
+        public FileWriterAdapter(string path)
+        {
+            this.path = path;
+            file = new FileStream(path, FileMode.Append, FileAccess.Write);
+        }
 
         public long Append(byte[] keyValue)
         {
@@ -19,6 +24,14 @@ namespace SortedStorage.Adapter.Out
             return position;
         }
 
+        public void Delete()
+        {
+            file.Dispose();
+            File.Delete(path);
+        }
+
         public void Dispose() => file?.Dispose();
+
+        public string GetName() => path;
     }
 }

@@ -1,6 +1,7 @@
 ﻿using SortedStorage.Application.Port.Out;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace SortedStorage.Application
 {
@@ -21,11 +22,13 @@ namespace SortedStorage.Application
 
         public void Add(string key, string value)
         {
+            Debug.WriteLine($"[StorageService] Adding key {key}");
             // TODO: rethink concurrency....
             lock (mainMemtable)
             {
                 if (mainMemtable.IsFull())
                 {
+                    Debug.WriteLine($"[StorageService] mainMemtable is full");
                     StoreMainMemtable();
                 }
 
@@ -41,9 +44,34 @@ namespace SortedStorage.Application
             mainMemtable = new Memtable(fileManager.OpenOrCreateToWrite($"{Guid.NewGuid()}.tmp"));
 
             // TODO: start a new Task to transform transfer memtable to a sstable
-            sstables.AddLast(SSTable.From(transferMemtable, fileManager));
-            transferMemtable.Dispose();
+            Debug.WriteLine($"[StorageService] transfer table started for file {transferMemtable.GetFileName()}");
+            sstables.AddFirst(SSTable.From(transferMemtable, fileManager));
+            transferMemtable.Delete();
             transferMemtable = null;
+            Debug.WriteLine($"[StorageService] transfer table completed");
+
+            // TODO: Move to a concurrent task
+            MergeLastSSTables();
+        }
+
+        private void MergeLastSSTables()
+        {
+            // TODO: Improve execution criteria and allow better usage of concurrency
+            if (sstables.Count > 2)
+            {
+                Debug.WriteLine($"[StorageService] merge tables started");
+                SSTable s1 = sstables.Last.Value;
+                sstables.RemoveLast();
+                Debug.WriteLine($"[StorageService] removing table {s1.GetFileName()}");
+
+                SSTable s2 = sstables.Last.Value;
+                sstables.RemoveLast();
+                Debug.WriteLine($"[StorageService] removing table {s2.GetFileName()}");
+
+                SSTable result = s1.Merge(s2, fileManager);
+                sstables.AddLast(result);
+                Debug.WriteLine($"[StorageService] merge tables completed with file {result.GetFileName()}");
+            }
         }
 
         public string Get(string key) => mainMemtable.Get(key)
