@@ -5,6 +5,8 @@ using System.Diagnostics;
 
 namespace SortedStorage.Application
 {
+    // TODO: Load resources from disk: could add header to files
+    // TODO: Add tests
     public class StorageService
     {
         private readonly IFileManagerPort fileManager;

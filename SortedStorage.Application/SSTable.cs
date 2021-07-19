@@ -23,7 +23,7 @@ namespace SortedStorage.Application
 
             var position = index[key];
 
-            var keyValue = KeyValueEntry.FromBytes(dataFile, position);
+            var keyValue = KeyValueEntry.FromFileReader(dataFile, position);
 
             return keyValue.Value;
         }
@@ -32,7 +32,7 @@ namespace SortedStorage.Application
         {
             foreach (var item in index)
             {
-                var keyValue = KeyValueEntry.FromBytes(dataFile, item.Value);
+                var keyValue = KeyValueEntry.FromFileReader(dataFile, item.Value);
                 yield return KeyValuePair.Create(keyValue.Key, keyValue.Value);
             }
         }

@@ -1,4 +1,5 @@
-﻿using SortedStorage.Application;
+﻿using FluentAssertions;
+using SortedStorage.Application;
 using System.Collections.Generic;
 using Xunit;
 
@@ -7,7 +8,7 @@ namespace SortedStorage.Tests
     public class PriorityEnumeratorTests
     {
         [Fact]
-        public void should_return_ordered_elements_when_sources_are_ordered()
+        public void Return_ordered_elements_when_sources_are_ordered()
         {
             // Arrange
             var list1 = new Dictionary<string, string>()
@@ -37,29 +38,29 @@ namespace SortedStorage.Tests
             var enumerator = priorityEnumerator.GetAll().GetEnumerator();
 
             // Assert
-            Assert.True(enumerator.MoveNext());
-            Assert.Equal("a", enumerator.Current.Key);
+            enumerator.MoveNext().Should().BeTrue();
+            enumerator.Current.Key.Should().Be("a");
 
-            Assert.True(enumerator.MoveNext());
-            Assert.Equal("b", enumerator.Current.Key);
+            enumerator.MoveNext().Should().BeTrue();
+            enumerator.Current.Key.Should().Be("b");
 
-            Assert.True(enumerator.MoveNext());
-            Assert.Equal("c", enumerator.Current.Key);
+            enumerator.MoveNext().Should().BeTrue();
+            enumerator.Current.Key.Should().Be("c");
 
-            Assert.True(enumerator.MoveNext());
-            Assert.Equal("d", enumerator.Current.Key);
+            enumerator.MoveNext().Should().BeTrue();
+            enumerator.Current.Key.Should().Be("d");
 
-            Assert.True(enumerator.MoveNext());
-            Assert.Equal("e", enumerator.Current.Key);
+            enumerator.MoveNext().Should().BeTrue();
+            enumerator.Current.Key.Should().Be("e");
 
-            Assert.True(enumerator.MoveNext());
-            Assert.Equal("f", enumerator.Current.Key);
+            enumerator.MoveNext().Should().BeTrue();
+            enumerator.Current.Key.Should().Be("f");
 
-            Assert.False(enumerator.MoveNext());
+            enumerator.MoveNext().Should().BeFalse();
         }
 
         [Fact]
-        public void enumerator_evaluates_after_first_move_next()
+        public void Enumerator_evaluates_after_first_move_next()
         {
             // Arrange
             var list1 = new Dictionary<string, string>();
@@ -75,12 +76,12 @@ namespace SortedStorage.Tests
             list1.Add("a", "test_a");
 
             // Assert
-            Assert.True(enumerator.MoveNext());
-            Assert.Equal("a", enumerator.Current.Key);
+            enumerator.MoveNext().Should().BeTrue();
+            enumerator.Current.Key.Should().Be("a");
         }
 
         [Fact]
-        public void after_move_next_enumerator_do_not_get_updated_with_new_items()
+        public void After_move_next_enumerator_do_not_get_updated_with_new_items()
         {
             // Arrange
             var list1 = new Dictionary<string, string>()
@@ -103,14 +104,14 @@ namespace SortedStorage.Tests
             list1.Add("c", "test_c");
 
             // Assert
-            Assert.True(enumerator.MoveNext());
-            Assert.Equal("b", enumerator.Current.Key);
+            enumerator.MoveNext().Should().BeTrue();
+            enumerator.Current.Key.Should().Be("b");
 
-            Assert.False(enumerator.MoveNext());
+            enumerator.MoveNext().Should().BeFalse();
         }
 
         [Fact]
-        public void empty_enumerators_creates_an_empty_enumerator()
+        public void Empty_enumerators_creates_an_empty_enumerator()
         {
             // Arrange
             var list1 = new Dictionary<string, string>();
@@ -125,7 +126,7 @@ namespace SortedStorage.Tests
             var enumerator = priorityEnumerator.GetAll().GetEnumerator();
 
             // Assert
-            Assert.False(enumerator.MoveNext());
+            enumerator.MoveNext().Should().BeFalse();
         }
     }
 }

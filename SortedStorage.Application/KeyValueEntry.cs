@@ -49,7 +49,7 @@ namespace SortedStorage.Application
             return keyValue.ToBytes();
         }
 
-        public static KeyValueEntry FromBytes(IFileReaderPort file, long position)
+        public static KeyValueEntry FromFileReader(IFileReaderPort file, long position)
         {
             byte[] header = file.Read(position, 12);
 
