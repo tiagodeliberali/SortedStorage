@@ -25,5 +25,20 @@ namespace SortedStorage.Tests
             entry2.Key.Should().Be("second key");
             entry2.Value.Should().Be("você know");
         }
+
+        [Fact]
+        public void Load_file_with_data_makes_it_available_to_search()
+        {
+            FileTestWriterAdapter fileWriter = new FileTestWriterAdapter("test");
+            Memtable memtable = new Memtable(fileWriter);
+
+            memtable.Add("firt key", "ação test");
+            memtable.Add("second key", "você know");
+            
+            Memtable loadedMemtable = new Memtable(fileWriter);
+
+            loadedMemtable.Get("firt key").Should().Be("ação test");
+            loadedMemtable.Get("second key").Should().Be("você know");
+        }
     }
 }

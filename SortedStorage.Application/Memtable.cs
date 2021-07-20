@@ -11,7 +11,21 @@ namespace SortedStorage.Application
         private readonly SortedDictionary<string, string> sortedDictionary = new SortedDictionary<string, string>();
         private readonly IFileWriterPort filePort;
 
-        public Memtable(IFileWriterPort filePort) => this.filePort = filePort;
+        public Memtable(IFileWriterPort filePort)
+        {
+            this.filePort = filePort;
+            LoadFile();
+        }
+
+        private void LoadFile()
+        {
+            filePort.Position = 0;
+            while (filePort.HasContent())
+            {
+                KeyValueEntry entry = KeyValueEntry.FromFileReader(filePort);
+                sortedDictionary.Add(entry.Key, entry.Value);
+            }
+        }
 
         public bool IsFull() => sortedDictionary.Count >= MAX_SIZE;
 

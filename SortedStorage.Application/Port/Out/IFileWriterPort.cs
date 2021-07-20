@@ -2,10 +2,8 @@
 
 namespace SortedStorage.Application.Port.Out
 {
-    public interface IFileWriterPort : IDisposable
+    public interface IFileWriterPort : IFileReaderPort
     {
-        string Name { get; }
-
         long Append(byte[] keyValue);
         void Delete();
     }

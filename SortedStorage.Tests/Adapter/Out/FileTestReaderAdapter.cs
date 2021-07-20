@@ -30,6 +30,8 @@ namespace SortedStorage.Tests.Adapter.Out
             return result;
         }
 
+        public bool HasContent() => Position < data.Count - 1;
+
         public void Dispose()
         {
         }

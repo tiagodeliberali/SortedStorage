@@ -8,6 +8,11 @@ namespace SortedStorage.Adapter.Out
         private readonly FileStream file;
 
         public string Name { get; }
+        public long Position
+        {
+            get => file.Position;
+            set => file.Seek(value, SeekOrigin.Begin);
+        }
 
         public FileWriterAdapter(string path)
         {
@@ -32,5 +37,17 @@ namespace SortedStorage.Adapter.Out
         }
 
         public void Dispose() => file?.Dispose();
+
+        public byte[] Read(long position, int size)
+        {
+            var data = new byte[size];
+
+            file.Seek(position, SeekOrigin.Begin);
+            file.Read(data, 0, size);
+
+            return data;
+        }
+
+        public bool HasContent() => file.Position < file.Length - 1;
     }
 }

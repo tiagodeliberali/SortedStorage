@@ -8,5 +8,6 @@ namespace SortedStorage.Application.Port.Out
         long Position { get; set; }
 
         byte[] Read(long position, int size);
+        bool HasContent();
     }
 }

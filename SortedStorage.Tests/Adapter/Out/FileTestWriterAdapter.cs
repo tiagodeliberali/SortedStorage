@@ -1,5 +1,6 @@
 ﻿using SortedStorage.Application.Port.Out;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SortedStorage.Tests.Adapter.Out
 {
@@ -8,6 +9,7 @@ namespace SortedStorage.Tests.Adapter.Out
         private List<byte> data = new List<byte>();
 
         public string Name { get; }
+        public long Position { get; set; }
 
         public FileTestWriterAdapter(string name)
         {
@@ -30,6 +32,20 @@ namespace SortedStorage.Tests.Adapter.Out
             data.Clear();
             data = null;
         }
+
+        public byte[] Read(long position, int size)
+        {
+            var result = data
+                .Skip((int)position)
+                .Take(size)
+                .ToArray();
+
+            Position += size;
+
+            return result;
+        }
+
+        public bool HasContent() => Position < data.Count - 1;
 
         public void Dispose()
         {

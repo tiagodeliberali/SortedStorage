@@ -9,7 +9,7 @@ namespace SortedStorage.Adapter.Out
 
         public string Name { get; }
 
-        long IFileReaderPort.Position
+        public long Position
         {
             get => file.Position; 
             set => file.Seek(value, SeekOrigin.Begin); 
@@ -30,6 +30,8 @@ namespace SortedStorage.Adapter.Out
 
             return data;
         }
+
+        public bool HasContent() => file.Position < file.Length - 1;
 
         public void Dispose() => file?.Dispose();
     }
