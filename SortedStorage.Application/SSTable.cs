@@ -15,7 +15,7 @@ namespace SortedStorage.Application
             this.index = index;
         }
 
-        public string GetFileName() => dataFile.GetName();
+        public string GetFileName() => dataFile.Name;
 
         public string Get(string key)
         {
@@ -50,7 +50,7 @@ namespace SortedStorage.Application
             {
                 foreach (var item in priorityEnumerator.GetAll())
                 {
-                    BuildFile(dataFile, indexFile, item, index);
+                    BuildFiles(dataFile, indexFile, item, index);
                 }
             }
 
@@ -67,14 +67,14 @@ namespace SortedStorage.Application
             {
                 foreach (var keyValue in memtable.GetData())
                 {
-                    BuildFile(dataFile, indexFile, keyValue, index);
+                    BuildFiles(dataFile, indexFile, keyValue, index);
                 }
             }
 
             return new SSTable(fileManager.OpenToRead($"{filename}.dat"), index);
         }
 
-        private static void BuildFile(IFileWriterPort dataFile, IFileWriterPort indexFile, KeyValuePair<string, string> keyValue, Dictionary<string, long> index)
+        private static void BuildFiles(IFileWriterPort dataFile, IFileWriterPort indexFile, KeyValuePair<string, string> keyValue, Dictionary<string, long> index)
         {
             long position = dataFile.Append(KeyValueEntry.ToBytes(keyValue.Key, keyValue.Value));
             index.Add(keyValue.Key, position);

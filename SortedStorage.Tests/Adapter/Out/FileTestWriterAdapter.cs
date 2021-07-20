@@ -5,12 +5,13 @@ namespace SortedStorage.Tests.Adapter.Out
 {
     public class FileTestWriterAdapter : IFileWriterPort
     {
-        private readonly string name;
         private List<byte> data = new List<byte>();
+
+        public string Name { get; }
 
         public FileTestWriterAdapter(string name)
         {
-            this.name = name;
+            Name = name;
         }
 
         public long Append(byte[] keyValue)
@@ -22,6 +23,8 @@ namespace SortedStorage.Tests.Adapter.Out
             return position;
         }
 
+        internal IFileReaderPort GetReader() => new FileTestReaderAdapter(Name, data);
+
         public void Delete()
         {
             data.Clear();
@@ -31,8 +34,6 @@ namespace SortedStorage.Tests.Adapter.Out
         public void Dispose()
         {
         }
-
-        public string GetName() => name;
 
         public void LoadForTest(IEnumerable<byte> bytes) => data.AddRange(bytes);
     }

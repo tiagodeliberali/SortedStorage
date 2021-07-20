@@ -6,27 +6,33 @@ namespace SortedStorage.Tests.Adapter.Out
 {
     class FileTestReaderAdapter : IFileReaderPort
     {
-        private readonly string name;
-        private readonly List<byte> data = new List<byte>();
+        private readonly List<byte> data;
 
-        public FileTestReaderAdapter(string name)
+        public string Name { get; }
+
+        public long Position { get; set; }
+
+        public FileTestReaderAdapter(string name, List<byte> data = null)
         {
-            this.name = name;
+            Name = name;
+            this.data = data ?? new List<byte>();
         }
 
         public byte[] Read(long position, int size)
         {
-            return data
+            var result = data
                 .Skip((int)position)
                 .Take(size)
                 .ToArray();
+
+            Position += size;
+
+            return result;
         }
 
         public void Dispose()
         {
         }
-
-        public string GetName() => name;
 
         public void LoadForTest(IEnumerable<byte> bytes) => data.AddRange(bytes);
     }

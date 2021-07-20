@@ -5,12 +5,19 @@ namespace SortedStorage.Adapter.Out
 {
     class FileReaderAdapter : IFileReaderPort
     {
-        private readonly string path;
         private readonly FileStream file;
+
+        public string Name { get; }
+
+        long IFileReaderPort.Position
+        {
+            get => file.Position; 
+            set => file.Seek(value, SeekOrigin.Begin); 
+        }
 
         public FileReaderAdapter(string path)
         {
-            this.path = path;
+            Name = path;
             file = new FileStream(path, FileMode.Open, FileAccess.Read);
         }
 
@@ -25,7 +32,5 @@ namespace SortedStorage.Adapter.Out
         }
 
         public void Dispose() => file?.Dispose();
-
-        public string GetName() => path;
     }
 }

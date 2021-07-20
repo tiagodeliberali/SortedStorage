@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace SortedStorage.Application
 {
-    class Memtable : IDisposable
+    public class Memtable : IDisposable
     {
         private const int MAX_SIZE = 2;
         private readonly SortedDictionary<string, string> sortedDictionary = new SortedDictionary<string, string>();
@@ -29,6 +29,6 @@ namespace SortedStorage.Application
 
         public void Dispose() => filePort?.Dispose();
 
-        public string GetFileName() => filePort.GetName();
+        public string GetFileName() => filePort.Name;
     }
 }

@@ -49,16 +49,19 @@ namespace SortedStorage.Application
             return keyValue.ToBytes();
         }
 
-        public static KeyValueEntry FromFileReader(IFileReaderPort file, long position)
+        public static KeyValueEntry FromFileReader(IFileReaderPort file, long? position = null)
         {
-            byte[] header = file.Read(position, 12);
+            if (!position.HasValue) position = file.Position;
+            else file.Position = position.Value;
+
+            byte[] header = file.Read(position.Value, 12);
 
             int checksum = BitConverter.ToInt32(header, 0);
             int keySize = BitConverter.ToInt32(header, 4);
             int valueSize = BitConverter.ToInt32(header, 8);
 
-            string keyData = Encoding.UTF8.GetString(file.Read(position + 12, keySize));
-            string valueData = Encoding.UTF8.GetString(file.Read(position + 12 + keySize, valueSize));
+            string keyData = Encoding.UTF8.GetString(file.Read(position.Value + 12, keySize));
+            string valueData = Encoding.UTF8.GetString(file.Read(position.Value + 12 + keySize, valueSize));
 
             KeyValueEntry keyValue = new KeyValueEntry(keyData, valueData);
 
