@@ -1,4 +1,5 @@
-﻿using SortedStorage.Application.Port.Out;
+﻿using Force.Crc32;
+using SortedStorage.Application.Port.Out;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,20 +17,19 @@ namespace SortedStorage.Application
         public string Key { get; }
         public string Value { get; }
 
-        public override bool Equals(object obj)
-        {
-            return obj is KeyValueEntry register
+        public override bool Equals(object obj) => obj is KeyValueEntry register
                     && Key == register.Key
                     && Value == register.Value;
-        }
 
         public override int GetHashCode() => HashCode.Combine(Key, Value);
+
+        private uint GetCrc32() => Crc32Algorithm.Compute(Encoding.UTF8.GetBytes($"{Key}{Value}"));
 
         public byte[] ToBytes()
         {
             List<byte> data = new List<byte>();
 
-            data.AddRange(BitConverter.GetBytes(GetHashCode()));
+            data.AddRange(BitConverter.GetBytes(GetCrc32()));
 
             byte[] keydata = Encoding.UTF8.GetBytes(Key);
             byte[] valueData = Encoding.UTF8.GetBytes(Value);
@@ -65,7 +65,7 @@ namespace SortedStorage.Application
 
             KeyValueEntry keyValue = new KeyValueEntry(keyData, valueData);
 
-            if (checksum != keyValue.GetHashCode())
+            if (checksum != keyValue.GetCrc32())
             {
                 throw new InvalidEntryParseException("Checksum not match");
             }
