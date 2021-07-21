@@ -8,6 +8,48 @@ namespace SortedStorage.Tests
     public class MemtableTests
     {
         [Fact]
+        public void Add_existent_keys_overrides_content()
+        {
+            FileTestWriterAdapter fileWriter = new FileTestWriterAdapter("test");
+            Memtable memtable = new Memtable(fileWriter);
+
+            memtable.Add("key", "ação test");
+            memtable.Add("key", "new content");
+
+            memtable.Get("key").Should().Be("new content");
+        }
+
+        [Fact]
+        public void Cannot_add_register_with_tombstone_value()
+        {
+            FileTestWriterAdapter fileWriter = new FileTestWriterAdapter("test");
+            Memtable memtable = new Memtable(fileWriter);
+
+            Assert.Throws<InvalidEntryValueException>(() => memtable.Add("key", StorageConfiguration.TOMBSTONE));
+        }
+
+        [Fact]
+        public void Delete_entry_add_value_with_tombstone()
+        {
+            FileTestWriterAdapter fileWriter = new FileTestWriterAdapter("test");
+            Memtable memtable = new Memtable(fileWriter);
+
+            memtable.Add("key", "ação test");
+            memtable.Remove("key");
+
+            memtable.Get("key").Should().Be(StorageConfiguration.TOMBSTONE);
+
+            var reader = fileWriter.GetReader();
+            KeyValueEntry entry1 = KeyValueEntry.FromFileReader(reader, 0);
+            entry1.Key.Should().Be("key");
+            entry1.Value.Should().Be("ação test");
+
+            KeyValueEntry entry2 = KeyValueEntry.FromFileReader(reader);
+            entry2.Key.Should().Be("key");
+            entry2.Value.Should().Be(StorageConfiguration.TOMBSTONE);
+        }
+
+        [Fact]
         public void Add_key_values_replicate_to_file()
         {
             FileTestWriterAdapter fileWriter = new FileTestWriterAdapter("test");

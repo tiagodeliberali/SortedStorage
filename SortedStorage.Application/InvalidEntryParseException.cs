@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace SortedStorage.Application
 {
     [Serializable]
-    internal class InvalidEntryParseException : Exception
+    public class InvalidEntryParseException : Exception
     {
         public InvalidEntryParseException()
         {

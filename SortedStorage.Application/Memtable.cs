@@ -31,15 +31,24 @@ namespace SortedStorage.Application
 
         public void Add(string key, string value)
         {
+            if (value == StorageConfiguration.TOMBSTONE)
+                throw new InvalidEntryValueException($"Invalid value '{value}'. It is used as tombstone.");
+
             file.Append(KeyValueEntry.ToBytes(key, value));
-            sortedDictionary.Add(key, value);
+            sortedDictionary[key] = value;
+        }
+
+        public void Remove(string key)
+        {
+            file.Append(KeyValueEntry.ToBytes(key, StorageConfiguration.TOMBSTONE));
+            sortedDictionary[key] = StorageConfiguration.TOMBSTONE;
         }
 
         public IEnumerable<KeyValuePair<string, string>> GetData() => sortedDictionary.AsEnumerable();
 
         public string Get(string key) => sortedDictionary.GetValueOrDefault(key);
 
-        public void Delete() => file?.Delete();
+        public void DeleteFile() => file?.Delete();
 
         public string GetFileName() => file.Name;
 
