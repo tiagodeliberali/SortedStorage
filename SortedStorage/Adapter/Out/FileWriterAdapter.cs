@@ -52,8 +52,9 @@ namespace SortedStorage.Adapter.Out
         public IFileReaderPort ToReadOnly(FileType destinationType)
         {
             file.Dispose();
-            File.Move(Name, FileManagerAdapter.BuildFileName(Name, destinationType));
-            return new FileReaderAdapter(Name);
+            string readonlyFilePath = FileManagerAdapter.BuildFileName(Name, destinationType);
+            File.Move(Name, readonlyFilePath);
+            return new FileReaderAdapter(readonlyFilePath);
         }
 
         public void Dispose() => file?.Dispose();

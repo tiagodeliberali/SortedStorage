@@ -21,8 +21,8 @@ namespace SortedStorage.Adapter.Out
         {
             string extension = type switch
             {
-                FileType.MemtableReadOnly => "memtable",
-                FileType.MemtableWriteAheadLog => "memtablereadonly",
+                FileType.MemtableReadOnly => "memtablereadonly",
+                FileType.MemtableWriteAheadLog => "memtable",
                 FileType.SSTableData => "sstable",
                 FileType.SSTableIndex => "index",
                 _ => throw new NotImplementedException(),
@@ -31,7 +31,7 @@ namespace SortedStorage.Adapter.Out
             return Path.ChangeExtension(name, extension);
         }
 
-        public IFileWriterPort OpenOrCreateToWriteSingle(FileType type)
+        public IFileWriterPort OpenOrCreateToWriteSingleFile(FileType type)
         {
             string searchPattern = BuildFileName("*.", type);
             var files = Directory.GetFiles(basePath, searchPattern);
@@ -43,6 +43,20 @@ namespace SortedStorage.Adapter.Out
                 return OpenOrCreateToWrite(files[0], type);
 
             return OpenOrCreateToWrite(Guid.NewGuid().ToString(), type);
+        }
+
+        public IFileReaderPort OpenToReadSingleFile(FileType type)
+        {
+            string searchPattern = BuildFileName("*.", type);
+            var files = Directory.GetFiles(basePath, searchPattern);
+
+            if (files.Length > 1)
+                throw new MoreThanOneOfTypeException($"Found more than one file of type {searchPattern} at {basePath}");
+
+            if (files.Length == 1)
+                return OpenToRead(files[0], type);
+
+            return null;
         }
     }
 }

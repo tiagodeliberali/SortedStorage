@@ -8,8 +8,10 @@ namespace SortedStorage.Tests.Adapter.Out
     {
         public IFileWriterPort OpenOrCreateToWrite(string name, FileType type) => new FileTestWriterAdapter(name);
 
-        public IFileWriterPort OpenOrCreateToWriteSingle(FileType type) => new FileTestWriterAdapter(Guid.NewGuid().ToString());
+        public IFileWriterPort OpenOrCreateToWriteSingleFile(FileType type) => new FileTestWriterAdapter(Guid.NewGuid().ToString());
 
         public IFileReaderPort OpenToRead(string name, FileType type) => new FileTestReaderAdapter(name);
+
+        public IFileReaderPort OpenToReadSingleFile(FileType type) => throw new NotImplementedException();
     }
 }

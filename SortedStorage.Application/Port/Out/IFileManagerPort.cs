@@ -4,6 +4,7 @@
     {
         IFileReaderPort OpenToRead(string name, FileType type);
         IFileWriterPort OpenOrCreateToWrite(string name, FileType type);
-        IFileWriterPort OpenOrCreateToWriteSingle(FileType type);
+        IFileWriterPort OpenOrCreateToWriteSingleFile(FileType type);
+        IFileReaderPort OpenToReadSingleFile(FileType type);
     }
 }

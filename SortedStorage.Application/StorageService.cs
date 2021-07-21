@@ -18,8 +18,22 @@ namespace SortedStorage.Application
         {
             this.fileManager = fileManager;
 
-            mainMemtable = new Memtable(fileManager.OpenOrCreateToWriteSingle(FileType.MemtableWriteAheadLog));
+            mainMemtable = new Memtable(fileManager.OpenOrCreateToWriteSingleFile(FileType.MemtableWriteAheadLog));
             sstables = new LinkedList<SSTable>();
+
+            LoadPendingTransferTable();
+        }
+
+        private void LoadPendingTransferTable()
+        {
+            var transferTableFile = fileManager.OpenToReadSingleFile(FileType.MemtableReadOnly);
+
+            if (transferTableFile != null)
+            {
+                Debug.WriteLine($"[StorageService] Found memtable readonly file. Finishing pending SSTable creation.");
+                transferMemtable = new ImutableMemtable(transferTableFile);
+                ConvertTransferMemtableToSSTable();
+            }
         }
 
         public void Add(string key, string value)
