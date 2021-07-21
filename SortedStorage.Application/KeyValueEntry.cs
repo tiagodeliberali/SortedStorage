@@ -23,7 +23,7 @@ namespace SortedStorage.Application
 
         public override int GetHashCode() => HashCode.Combine(Key, Value);
 
-        private uint GetCrc32() => Crc32Algorithm.Compute(Encoding.UTF8.GetBytes($"{Key}{Value}"));
+        public uint GetCrc32() => Crc32Algorithm.Compute(Encoding.UTF8.GetBytes($"{Key}{Value}"));
 
         public byte[] ToBytes()
         {
@@ -56,7 +56,7 @@ namespace SortedStorage.Application
 
             byte[] header = file.Read(position.Value, 12);
 
-            int checksum = BitConverter.ToInt32(header, 0);
+            uint checksum = BitConverter.ToUInt32(header, 0);
             int keySize = BitConverter.ToInt32(header, 4);
             int valueSize = BitConverter.ToInt32(header, 8);
 

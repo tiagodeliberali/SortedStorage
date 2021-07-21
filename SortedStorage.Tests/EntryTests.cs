@@ -16,7 +16,7 @@ namespace SortedStorage.Tests
 
             byte[] data = keyValue.ToBytes();
 
-            BitConverter.ToInt32(data, 0).Should().Be(keyValue.GetHashCode());
+            BitConverter.ToUInt32(data, 0).Should().Be(keyValue.GetCrc32());
             BitConverter.ToInt32(data, 4).Should().Be(3);
             BitConverter.ToInt32(data, 8).Should().Be(6);
             Encoding.UTF8.GetString(data, 12, 9).Should().Be("keyação");
