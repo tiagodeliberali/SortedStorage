@@ -40,5 +40,20 @@ namespace SortedStorage.Tests
             loadedMemtable.Get("firt key").Should().Be("ação test");
             loadedMemtable.Get("second key").Should().Be("você know");
         }
+
+        [Fact]
+        public void Convert_to_imutable_preserve_existing_data()
+        {
+            FileTestWriterAdapter fileWriter = new FileTestWriterAdapter("test");
+            Memtable memtable = new Memtable(fileWriter);
+
+            memtable.Add("firt key", "ação test");
+            memtable.Add("second key", "você know");
+
+            ImutableMemtable imutableMemtable = memtable.ToImutable();
+
+            imutableMemtable.Get("firt key").Should().Be("ação test");
+            imutableMemtable.Get("second key").Should().Be("você know");
+        }
     }
 }

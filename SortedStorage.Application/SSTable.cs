@@ -45,8 +45,8 @@ namespace SortedStorage.Application
             string filename = Guid.NewGuid().ToString();
             Dictionary<string, long> index = new Dictionary<string, long>();
 
-            using (IFileWriterPort dataFile = fileManager.OpenOrCreateToWrite($"{filename}.dat"))
-            using (IFileWriterPort indexFile = fileManager.OpenOrCreateToWrite($"{filename}.idx"))
+            using (IFileWriterPort dataFile = fileManager.OpenOrCreateToWrite(filename, FileType.SSTableData))
+            using (IFileWriterPort indexFile = fileManager.OpenOrCreateToWrite(filename, FileType.SSTableIndex))
             {
                 foreach (var item in priorityEnumerator.GetAll())
                 {
@@ -54,16 +54,16 @@ namespace SortedStorage.Application
                 }
             }
 
-            return new SSTable(fileManager.OpenToRead($"{filename}.dat"), index);
+            return new SSTable(fileManager.OpenToRead(filename, FileType.SSTableData), index);
         }
 
-        public static SSTable From(Memtable memtable, IFileManagerPort fileManager)
+        public static SSTable From(ImutableMemtable memtable, IFileManagerPort fileManager)
         {
             string filename = Guid.NewGuid().ToString();
             Dictionary<string, long> index = new Dictionary<string, long>();
 
-            using (IFileWriterPort dataFile = fileManager.OpenOrCreateToWrite($"{filename}.dat"))
-            using (IFileWriterPort indexFile = fileManager.OpenOrCreateToWrite($"{filename}.idx"))
+            using (IFileWriterPort dataFile = fileManager.OpenOrCreateToWrite(filename, FileType.SSTableData))
+            using (IFileWriterPort indexFile = fileManager.OpenOrCreateToWrite(filename, FileType.SSTableIndex))
             {
                 foreach (var keyValue in memtable.GetData())
                 {
@@ -71,7 +71,7 @@ namespace SortedStorage.Application
                 }
             }
 
-            return new SSTable(fileManager.OpenToRead($"{filename}.dat"), index);
+            return new SSTable(fileManager.OpenToRead(filename, FileType.SSTableData), index);
         }
 
         private static void BuildFiles(IFileWriterPort dataFile, IFileWriterPort indexFile, KeyValuePair<string, string> keyValue, Dictionary<string, long> index)

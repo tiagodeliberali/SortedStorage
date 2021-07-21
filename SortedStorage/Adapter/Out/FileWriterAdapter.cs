@@ -1,4 +1,5 @@
-﻿using SortedStorage.Application.Port.Out;
+﻿using SortedStorage.Application;
+using SortedStorage.Application.Port.Out;
 using System.IO;
 
 namespace SortedStorage.Adapter.Out
@@ -36,8 +37,6 @@ namespace SortedStorage.Adapter.Out
             File.Delete(Name);
         }
 
-        public void Dispose() => file?.Dispose();
-
         public byte[] Read(long position, int size)
         {
             var data = new byte[size];
@@ -49,5 +48,14 @@ namespace SortedStorage.Adapter.Out
         }
 
         public bool HasContent() => file.Position < file.Length - 1;
+
+        public IFileReaderPort ToReadOnly(FileType destinationType)
+        {
+            file.Dispose();
+            File.Move(Name, FileManagerAdapter.BuildFileName(Name, destinationType));
+            return new FileReaderAdapter(Name);
+        }
+
+        public void Dispose() => file?.Dispose();
     }
 }

@@ -9,20 +9,20 @@ namespace SortedStorage.Application
     {
         private const int MAX_SIZE = 2;
         private readonly SortedDictionary<string, string> sortedDictionary = new SortedDictionary<string, string>();
-        private readonly IFileWriterPort filePort;
+        private readonly IFileWriterPort file;
 
-        public Memtable(IFileWriterPort filePort)
+        public Memtable(IFileWriterPort file)
         {
-            this.filePort = filePort;
+            this.file = file;
             LoadFile();
         }
 
         private void LoadFile()
         {
-            filePort.Position = 0;
-            while (filePort.HasContent())
+            file.Position = 0;
+            while (file.HasContent())
             {
-                KeyValueEntry entry = KeyValueEntry.FromFileReader(filePort);
+                KeyValueEntry entry = KeyValueEntry.FromFileReader(file);
                 sortedDictionary.Add(entry.Key, entry.Value);
             }
         }
@@ -31,7 +31,7 @@ namespace SortedStorage.Application
 
         public void Add(string key, string value)
         {
-            filePort.Append(KeyValueEntry.ToBytes(key, value));
+            file.Append(KeyValueEntry.ToBytes(key, value));
             sortedDictionary.Add(key, value);
         }
 
@@ -39,10 +39,12 @@ namespace SortedStorage.Application
 
         public string Get(string key) => sortedDictionary.GetValueOrDefault(key);
 
-        public void Delete() => filePort?.Delete();
+        public void Delete() => file?.Delete();
 
-        public void Dispose() => filePort?.Dispose();
+        public string GetFileName() => file.Name;
 
-        public string GetFileName() => filePort.Name;
+        public void Dispose() => file?.Dispose();
+
+        public ImutableMemtable ToImutable() => new ImutableMemtable(file.ToReadOnly(FileType.MemtableReadOnly), sortedDictionary);
     }
 }

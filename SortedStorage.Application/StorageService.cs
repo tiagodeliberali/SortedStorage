@@ -12,13 +12,13 @@ namespace SortedStorage.Application
         private readonly IFileManagerPort fileManager;
         private readonly LinkedList<SSTable> sstables;
         private Memtable mainMemtable;
-        private Memtable transferMemtable;
+        private ImutableMemtable transferMemtable;
 
         public StorageService(IFileManagerPort fileManager)
         {
             this.fileManager = fileManager;
 
-            mainMemtable = new Memtable(fileManager.OpenOrCreateToWrite($"{Guid.NewGuid()}.tmp"));
+            mainMemtable = new Memtable(fileManager.OpenOrCreateToWrite(Guid.NewGuid().ToString(), FileType.MemtableWriteAheadLog));
             sstables = new LinkedList<SSTable>();
         }
 
@@ -42,8 +42,8 @@ namespace SortedStorage.Application
         {
             // TODO: if main memtable gets full before finishing to create sstable from transfer memtable
             // we are going to have problems... (must define which kind of problem)
-            transferMemtable = mainMemtable;
-            mainMemtable = new Memtable(fileManager.OpenOrCreateToWrite($"{Guid.NewGuid()}.tmp"));
+            transferMemtable = mainMemtable.ToImutable();
+            mainMemtable = new Memtable(fileManager.OpenOrCreateToWrite(Guid.NewGuid().ToString(), FileType.MemtableWriteAheadLog));
 
             // TODO: start a new Task to transform transfer memtable to a sstable
             Debug.WriteLine($"[StorageService] transfer table started for file {transferMemtable.GetFileName()}");

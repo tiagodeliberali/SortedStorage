@@ -33,6 +33,12 @@ namespace SortedStorage.Adapter.Out
 
         public bool HasContent() => file.Position < file.Length - 1;
 
+        public void Delete()
+        {
+            file.Dispose();
+            File.Delete(Name);
+        }
+
         public void Dispose() => file?.Dispose();
     }
 }

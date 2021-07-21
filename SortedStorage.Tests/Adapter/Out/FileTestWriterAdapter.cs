@@ -1,4 +1,5 @@
-﻿using SortedStorage.Application.Port.Out;
+﻿using SortedStorage.Application;
+using SortedStorage.Application.Port.Out;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -46,6 +47,11 @@ namespace SortedStorage.Tests.Adapter.Out
         }
 
         public bool HasContent() => Position < data.Count - 1;
+
+        public IFileReaderPort ToReadOnly(FileType destinationType)
+        {
+            return new FileTestReaderAdapter(Name, data);
+        }
 
         public void Dispose()
         {

@@ -9,5 +9,6 @@ namespace SortedStorage.Application.Port.Out
 
         byte[] Read(long position, int size);
         bool HasContent();
+        void Delete();
     }
 }
