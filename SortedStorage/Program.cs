@@ -20,7 +20,7 @@ namespace SortedStorage
 
             while (true)
             {
-                Console.WriteLine("[a (add), g (get), q (quit)]>");
+                Console.WriteLine("[a (add), r (remove), g (get), q (quit)]>");
                 string action = Console.ReadLine();
 
                 if (action.StartsWith("q"))
@@ -33,6 +33,11 @@ namespace SortedStorage
                 if (action.StartsWith("a"))
                 {
                     storage.Add(data[1], data[2]);
+                }
+
+                if (action.StartsWith("r"))
+                {
+                    storage.Remove(data[1]);
                 }
 
                 if (action.StartsWith("g"))
