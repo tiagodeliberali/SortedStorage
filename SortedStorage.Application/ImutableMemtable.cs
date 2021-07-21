@@ -7,12 +7,25 @@ namespace SortedStorage.Application
     public class ImutableMemtable
     {
         private readonly IFileReaderPort file;
-        private readonly SortedDictionary<string, string> sortedDictionary;
+        private SortedDictionary<string, string> sortedDictionary;
 
-        public ImutableMemtable(IFileReaderPort file, SortedDictionary<string, string> sortedDictionary)
+        public ImutableMemtable(IFileReaderPort file, SortedDictionary<string, string> sortedDictionary = null)
         {
             this.file = file;
-            this.sortedDictionary = sortedDictionary;
+            if (sortedDictionary != null) this.sortedDictionary = sortedDictionary;
+            else LoadDataFromFile();
+        }
+
+        private void LoadDataFromFile()
+        {
+            file.Position = 0;
+            sortedDictionary = new SortedDictionary<string, string>();
+
+            while (file.HasContent())
+            {
+                KeyValueEntry entry = KeyValueEntry.FromFileReader(file);
+                sortedDictionary.Add(entry.Key, entry.Value);
+            }
         }
 
         public IEnumerable<KeyValuePair<string, string>> GetData() => sortedDictionary.AsEnumerable();
