@@ -18,7 +18,7 @@ namespace SortedStorage.Application
         {
             this.fileManager = fileManager;
 
-            mainMemtable = new Memtable(fileManager.OpenOrCreateToWrite(Guid.NewGuid().ToString(), FileType.MemtableWriteAheadLog));
+            mainMemtable = new Memtable(fileManager.OpenOrCreateToWriteSingle(FileType.MemtableWriteAheadLog));
             sstables = new LinkedList<SSTable>();
         }
 

@@ -18,7 +18,7 @@ namespace SortedStorage.Adapter.Out
         public FileWriterAdapter(string path)
         {
             Name = path;
-            file = new FileStream(path, FileMode.Append, FileAccess.Write);
+            file = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite);
         }
 
         public long Append(byte[] keyValue)
