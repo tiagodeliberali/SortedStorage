@@ -99,15 +99,15 @@ namespace SortedStorage.Application
             if (sstables.Count > 2)
             {
                 Debug.WriteLine($"[StorageService] merge tables started");
-                SSTable s1 = sstables.Last.Value;
+                SSTable older = sstables.Last.Value;
                 sstables.RemoveLast();
-                Debug.WriteLine($"[StorageService] removing table {s1.GetFileName()}");
+                Debug.WriteLine($"[StorageService] removing table {older.GetFileName()}");
 
-                SSTable s2 = sstables.Last.Value;
+                SSTable newer = sstables.Last.Value;
                 sstables.RemoveLast();
-                Debug.WriteLine($"[StorageService] removing table {s2.GetFileName()}");
+                Debug.WriteLine($"[StorageService] removing table {newer.GetFileName()}");
 
-                SSTable result = s1.Merge(s2, fileManager);
+                SSTable result = older.Merge(newer, fileManager);
                 sstables.AddLast(result);
                 Debug.WriteLine($"[StorageService] merge tables completed with file {result.GetFileName()}");
             }
