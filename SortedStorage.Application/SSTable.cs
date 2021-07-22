@@ -74,6 +74,20 @@ namespace SortedStorage.Application
             return new SSTable(fileManager.OpenToRead(filename, FileType.SSTableData), index);
         }
 
+        public static SSTable From(IFileReaderPort indexFile, IFileReaderPort dataFile)
+        {
+            Dictionary<string, long> index = new Dictionary<string, long>();
+
+            indexFile.Position = 0;
+            while (indexFile.HasContent())
+            {
+                IndexEntry entry = IndexEntry.FromIndexFileReader(indexFile);
+                index.Add(entry.Key, entry.Position);
+            }
+
+            return new SSTable(dataFile, index);
+        }
+
         private static void BuildFiles(IFileWriterPort dataFile, IFileWriterPort indexFile, KeyValuePair<string, string> keyValue, Dictionary<string, long> index)
         {
             long position = dataFile.Append(KeyValueEntry.ToBytes(keyValue.Key, keyValue.Value));

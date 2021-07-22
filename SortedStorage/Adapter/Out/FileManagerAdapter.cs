@@ -1,7 +1,9 @@
 ﻿using SortedStorage.Application;
 using SortedStorage.Application.Port.Out;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace SortedStorage.Adapter.Out
 {
@@ -57,6 +59,12 @@ namespace SortedStorage.Adapter.Out
                 return OpenToRead(files[0], type);
 
             return null;
+        }
+
+        public IEnumerable<IFileReaderPort> OpenToReadAll(FileType type)
+        {
+            string searchPattern = BuildFileName("*.", type);
+            return Directory.GetFiles(basePath, searchPattern).Select(x => OpenToRead(x, type));
         }
     }
 }

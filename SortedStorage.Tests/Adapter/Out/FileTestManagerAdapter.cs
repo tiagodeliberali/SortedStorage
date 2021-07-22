@@ -1,6 +1,7 @@
 ﻿using SortedStorage.Application;
 using SortedStorage.Application.Port.Out;
 using System;
+using System.Collections.Generic;
 
 namespace SortedStorage.Tests.Adapter.Out
 {
@@ -11,6 +12,8 @@ namespace SortedStorage.Tests.Adapter.Out
         public IFileWriterPort OpenOrCreateToWriteSingleFile(FileType type) => new FileTestWriterAdapter(Guid.NewGuid().ToString());
 
         public IFileReaderPort OpenToRead(string name, FileType type) => new FileTestReaderAdapter(name);
+
+        public IEnumerable<IFileReaderPort> OpenToReadAll(FileType type) => throw new NotImplementedException();
 
         public IFileReaderPort OpenToReadSingleFile(FileType type) => throw new NotImplementedException();
     }

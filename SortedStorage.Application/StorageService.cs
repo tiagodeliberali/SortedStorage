@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 
 namespace SortedStorage.Application
 {
@@ -22,6 +23,16 @@ namespace SortedStorage.Application
             sstables = new LinkedList<SSTable>();
 
             LoadPendingTransferTable();
+            LoadSSTables();
+        }
+
+        private void LoadSSTables()
+        {
+            foreach (var indexFile in fileManager.OpenToReadAll(FileType.SSTableIndex))
+            {
+                var dataFile = fileManager.OpenToRead(Path.GetFileNameWithoutExtension(indexFile.Name), FileType.SSTableData);
+                sstables.AddLast(SSTable.From(indexFile, dataFile));
+            }
         }
 
         private void LoadPendingTransferTable()
