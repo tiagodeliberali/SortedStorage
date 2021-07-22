@@ -30,7 +30,7 @@ namespace SortedStorage.Application
             foreach (var indexFile in fileManager.OpenToReadAll(FileType.SSTableIndex))
             {
                 var dataFile = fileManager.OpenToRead(Path.GetFileNameWithoutExtension(indexFile.Name), FileType.SSTableData);
-                sstables.AddLast(SSTable.From(indexFile, dataFile));
+                sstables.AddLast(SSTable.Load(indexFile, dataFile));
             }
         }
 

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace SortedStorage.Application
 {
-    class SSTable : IDisposable
+    public class SSTable : IDisposable
     {
         private readonly IFileReaderPort dataFile;
         private readonly Dictionary<string, long> index;
@@ -31,7 +31,6 @@ namespace SortedStorage.Application
 
         public IEnumerable<KeyValuePair<string, string>> GetAll()
         {
-            // Since this is an ordered file, we don't need to rely on index and just read all data
             dataFile.Position = 0;
             while (dataFile.HasContent())
             {
@@ -77,7 +76,7 @@ namespace SortedStorage.Application
             return new SSTable(fileManager.OpenToRead(filename, FileType.SSTableData), index);
         }
 
-        public static SSTable From(IFileReaderPort indexFile, IFileReaderPort dataFile)
+        public static SSTable Load(IFileReaderPort indexFile, IFileReaderPort dataFile)
         {
             Dictionary<string, long> index = new Dictionary<string, long>();
 

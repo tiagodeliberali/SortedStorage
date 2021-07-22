@@ -7,13 +7,14 @@ namespace SortedStorage.Tests.Adapter.Out
 {
     public class FileTestWriterAdapter : IFileWriterPort
     {
-        private List<byte> data = new List<byte>();
+        private List<byte> data;
 
         public string Name { get; }
         public long Position { get; set; }
 
-        public FileTestWriterAdapter(string name)
+        public FileTestWriterAdapter(string name, List<byte> data = null)
         {
+            this.data = data ?? new List<byte>();
             Name = name;
         }
 
