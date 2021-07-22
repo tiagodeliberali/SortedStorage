@@ -6,7 +6,6 @@ using System.IO;
 
 namespace SortedStorage.Application
 {
-    // TODO: Load resources from disk: could add header to files
     // TODO: Add tests
     public class StorageService
     {
@@ -22,8 +21,8 @@ namespace SortedStorage.Application
             mainMemtable = new Memtable(fileManager.OpenOrCreateToWriteSingleFile(FileType.MemtableWriteAheadLog));
             sstables = new LinkedList<SSTable>();
 
-            LoadPendingTransferTable();
             LoadSSTables();
+            LoadPendingTransferTable();
         }
 
         private void LoadSSTables()

@@ -64,7 +64,10 @@ namespace SortedStorage.Adapter.Out
         public IEnumerable<IFileReaderPort> OpenToReadAll(FileType type)
         {
             string searchPattern = BuildFileName("*.", type);
-            return Directory.GetFiles(basePath, searchPattern).Select(x => OpenToRead(x, type));
+            return Directory
+                .GetFiles(basePath, searchPattern)
+                .OrderBy(x => new FileInfo(x).CreationTime)
+                .Select(x => OpenToRead(x, type));
         }
     }
 }
