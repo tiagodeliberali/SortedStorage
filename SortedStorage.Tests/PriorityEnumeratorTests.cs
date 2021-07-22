@@ -128,5 +128,52 @@ namespace SortedStorage.Tests
             // Assert
             enumerator.MoveNext().Should().BeFalse();
         }
+
+        [Fact]
+        public void Same_key_preserve_values_of_last_enumerator()
+        {
+            // Arrange
+            var list1 = new Dictionary<string, string>()
+            {
+                ["a"] = "test_a",
+                ["d"] = "test_d-1"
+            };
+
+            var list2 = new Dictionary<string, string>()
+            {
+                ["b"] = "test_b",
+                ["d"] = "test_d-2"
+            };
+
+            var list3 = new Dictionary<string, string>()
+            {
+                ["c"] = "test_c",
+                ["d"] = "test_d-3",
+            };
+
+            PriorityEnumerator priorityEnumerator = new PriorityEnumerator(new List<IEnumerable<KeyValuePair<string, string>>>()
+            {
+                list3, list2, list1
+            });
+
+            // Act
+            var enumerator = priorityEnumerator.GetAll().GetEnumerator();
+
+            // Assert
+            enumerator.MoveNext().Should().BeTrue();
+            enumerator.Current.Key.Should().Be("a");
+
+            enumerator.MoveNext().Should().BeTrue();
+            enumerator.Current.Key.Should().Be("b");
+
+            enumerator.MoveNext().Should().BeTrue();
+            enumerator.Current.Key.Should().Be("c");
+
+            enumerator.MoveNext().Should().BeTrue();
+            enumerator.Current.Key.Should().Be("d");
+            enumerator.Current.Value.Should().Be("test_d-3");
+
+            enumerator.MoveNext().Should().BeFalse();
+        }
     }
 }

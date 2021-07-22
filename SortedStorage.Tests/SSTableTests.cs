@@ -95,17 +95,17 @@ namespace SortedStorage.Tests
         {
             FileTestManagerAdapter fileManager = new FileTestManagerAdapter();
 
-            SSTable sstable1 = BuildSSTableFromImutableMemtable(fileManager, new List<KeyValueEntry> {
+            SSTable older = BuildSSTableFromImutableMemtable(fileManager, new List<KeyValueEntry> {
                 new KeyValueEntry("key1", "value1"),
                 new KeyValueEntry("key4", "value4-1"),
             });
 
-            SSTable sstable2 = BuildSSTableFromImutableMemtable(fileManager, new List<KeyValueEntry> {
+            SSTable newer = BuildSSTableFromImutableMemtable(fileManager, new List<KeyValueEntry> {
                 new KeyValueEntry("key2", "value2"),
                 new KeyValueEntry("key4", "value4-2"),
             });
 
-            SSTable result = sstable1.Merge(sstable2, fileManager);
+            SSTable result = older.Merge(newer, fileManager);
 
             result.Get("key4").Should().Be("value4-2");
         }
