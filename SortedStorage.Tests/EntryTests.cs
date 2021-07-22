@@ -29,7 +29,8 @@ namespace SortedStorage.Tests
             KeyValueEntry keyValue = new KeyValueEntry("key", "ação");
             fileReader.LoadForTest(keyValue.ToBytes());
 
-            KeyValueEntry result = KeyValueEntry.FromFileReader(fileReader, 0);
+            fileReader.Position = 0;
+            KeyValueEntry result = KeyValueEntry.FromFileReader(fileReader);
 
             result.Key.Should().Be("key");
             result.Value.Should().Be("ação");
@@ -42,9 +43,9 @@ namespace SortedStorage.Tests
 
             byte[] data = index.ToBytes();
 
-            BitConverter.ToInt32(data, 0).Should().Be(6);
-            Encoding.UTF8.GetString(data, 4, 6).Should().Be("ação");
-            BitConverter.ToInt64(data, 10).Should().Be(123456789);
+            BitConverter.ToInt64(data, 0).Should().Be(123456789);
+            BitConverter.ToInt32(data, 8).Should().Be(6);
+            Encoding.UTF8.GetString(data, 12, 6).Should().Be("ação");
         }
     }
 }

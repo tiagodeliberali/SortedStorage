@@ -7,7 +7,7 @@ namespace SortedStorage.Application.Port.Out
         string Name { get; }
         long Position { get; set; }
 
-        byte[] Read(long position, int size);
+        byte[] Read(int size);
         bool HasContent();
         void Delete();
     }

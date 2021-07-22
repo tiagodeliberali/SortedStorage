@@ -40,7 +40,8 @@ namespace SortedStorage.Tests
             memtable.Get("key").Should().Be(StorageConfiguration.TOMBSTONE);
 
             var reader = fileWriter.GetReader();
-            KeyValueEntry entry1 = KeyValueEntry.FromFileReader(reader, 0);
+            reader.Position = 0;
+            KeyValueEntry entry1 = KeyValueEntry.FromFileReader(reader);
             entry1.Key.Should().Be("key");
             entry1.Value.Should().Be("ação test");
 
@@ -59,7 +60,8 @@ namespace SortedStorage.Tests
             memtable.Add("second key", "você know");
 
             var reader = fileWriter.GetReader();
-            KeyValueEntry entry1 = KeyValueEntry.FromFileReader(reader, 0);
+            reader.Position = 0;
+            KeyValueEntry entry1 = KeyValueEntry.FromFileReader(reader);
             entry1.Key.Should().Be("firt key");
             entry1.Value.Should().Be("ação test");
 
@@ -76,7 +78,7 @@ namespace SortedStorage.Tests
 
             memtable.Add("firt key", "ação test");
             memtable.Add("second key", "você know");
-            
+
             Memtable loadedMemtable = new Memtable(fileWriter);
 
             loadedMemtable.Get("firt key").Should().Be("ação test");

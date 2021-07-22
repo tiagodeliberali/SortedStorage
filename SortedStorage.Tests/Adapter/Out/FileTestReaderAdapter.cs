@@ -1,5 +1,4 @@
-﻿using SortedStorage.Application;
-using SortedStorage.Application.Port.Out;
+﻿using SortedStorage.Application.Port.Out;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -19,10 +18,10 @@ namespace SortedStorage.Tests.Adapter.Out
             this.data = data ?? new List<byte>();
         }
 
-        public byte[] Read(long position, int size)
+        public byte[] Read(int size)
         {
             var result = data
-                .Skip((int)position)
+                .Skip((int)Position)
                 .Take(size)
                 .ToArray();
 

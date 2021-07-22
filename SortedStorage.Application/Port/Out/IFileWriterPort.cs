@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SortedStorage.Application.Port.Out
+﻿namespace SortedStorage.Application.Port.Out
 {
     public interface IFileWriterPort : IFileReaderPort
     {

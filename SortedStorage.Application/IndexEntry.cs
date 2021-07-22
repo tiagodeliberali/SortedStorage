@@ -37,12 +37,11 @@ namespace SortedStorage.Application
 
         public static IndexEntry FromIndexFileReader(IFileReaderPort file)
         {
-            long position = file.Position;
-            byte[] header = file.Read(position, 12);
+            byte[] header = file.Read(12);
 
             long indexPosition = BitConverter.ToInt64(header, 0);
             int keySize = BitConverter.ToInt32(header, 8);
-            string keyData = Encoding.UTF8.GetString(file.Read(position + 12, keySize));
+            string keyData = Encoding.UTF8.GetString(file.Read(keySize));
 
             IndexEntry keyValue = new IndexEntry(keyData, indexPosition);
 

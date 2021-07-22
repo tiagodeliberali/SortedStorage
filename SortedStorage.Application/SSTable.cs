@@ -23,16 +23,19 @@ namespace SortedStorage.Application
 
             var position = index[key];
 
-            var keyValue = KeyValueEntry.FromFileReader(dataFile, position);
+            dataFile.Position = position;
+            var keyValue = KeyValueEntry.FromFileReader(dataFile);
 
             return keyValue.Value;
         }
 
         public IEnumerable<KeyValuePair<string, string>> GetAll()
         {
-            foreach (var item in index)
+            // Since this is an ordered file, we don't need to rely on index and just read all data
+            dataFile.Position = 0;
+            while (dataFile.HasContent())
             {
-                var keyValue = KeyValueEntry.FromFileReader(dataFile, item.Value);
+                var keyValue = KeyValueEntry.FromFileReader(dataFile);
                 yield return KeyValuePair.Create(keyValue.Key, keyValue.Value);
             }
         }
@@ -91,7 +94,7 @@ namespace SortedStorage.Application
         private static void BuildFiles(IFileWriterPort dataFile, IFileWriterPort indexFile, KeyValuePair<string, string> keyValue, Dictionary<string, long> index)
         {
             long position = dataFile.Append(KeyValueEntry.ToBytes(keyValue.Key, keyValue.Value));
-            index.Add(keyValue.Key, position);
+            index[keyValue.Key] = position;
             indexFile.Append(IndexEntry.ToBytes(keyValue.Key, position));
         }
 

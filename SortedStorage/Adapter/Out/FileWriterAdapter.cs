@@ -37,11 +37,9 @@ namespace SortedStorage.Adapter.Out
             File.Delete(Name);
         }
 
-        public byte[] Read(long position, int size)
+        public byte[] Read(int size)
         {
             var data = new byte[size];
-
-            file.Seek(position, SeekOrigin.Begin);
             file.Read(data, 0, size);
 
             return data;

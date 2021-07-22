@@ -40,8 +40,8 @@ namespace SortedStorage.Adapter.Out
 
             if (files.Length > 1)
                 throw new MoreThanOneOfTypeException($"Found more than one file of type {searchPattern} at {basePath}");
-            
-            if (files.Length == 1) 
+
+            if (files.Length == 1)
                 return OpenOrCreateToWrite(files[0], type);
 
             return OpenOrCreateToWrite(Guid.NewGuid().ToString(), type);

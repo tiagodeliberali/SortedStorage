@@ -22,7 +22,7 @@ namespace SortedStorage.Application
 
                 if (enumerator.MoveNext())
                 {
-                    enumerators.Add(enumerator.Current.Key, enumerator);
+                    enumerators[enumerator.Current.Key] = enumerator;
                 }
             }
 
@@ -35,7 +35,7 @@ namespace SortedStorage.Application
 
                 if (nextEnumerator.Value.MoveNext())
                 {
-                    enumerators.Add(nextEnumerator.Value.Current.Key, nextEnumerator.Value);
+                    enumerators[nextEnumerator.Value.Current.Key] = nextEnumerator.Value;
                 }
 
                 yield return keyValueResult;

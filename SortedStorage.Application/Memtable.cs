@@ -23,7 +23,7 @@ namespace SortedStorage.Application
             while (file.HasContent())
             {
                 KeyValueEntry entry = KeyValueEntry.FromFileReader(file);
-                sortedDictionary.Add(entry.Key, entry.Value);
+                sortedDictionary[entry.Key] = entry.Value;
             }
         }
 

@@ -34,10 +34,10 @@ namespace SortedStorage.Tests.Adapter.Out
             data = null;
         }
 
-        public byte[] Read(long position, int size)
+        public byte[] Read(int size)
         {
             var result = data
-                .Skip((int)position)
+                .Skip((int)Position)
                 .Take(size)
                 .ToArray();
 
