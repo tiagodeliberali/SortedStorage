@@ -121,7 +121,7 @@ namespace SortedStorage.Tests
                 await memtable.Add(item.Key, item.Value);
             }
 
-            SSTable sstable = SSTable.From(memtable.ToImutable(), fileManager);
+            SSTable sstable = await SSTable.From(memtable.ToImutable(), fileManager);
             return sstable;
         }
     }

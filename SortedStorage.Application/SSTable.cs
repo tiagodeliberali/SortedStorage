@@ -53,14 +53,14 @@ namespace SortedStorage.Application
             {
                 await foreach (var item in priorityEnumerator.GetAll())
                 {
-                    BuildFiles(dataFile, indexFile, item, index);
+                    await BuildFiles(dataFile, indexFile, item, index);
                 }
             }
 
             return new SSTable(fileManager.OpenToRead(filename, FileType.SSTableData), index);
         }
 
-        public static SSTable From(ImutableMemtable memtable, IFileManagerPort fileManager)
+        public static async Task<SSTable> From(ImutableMemtable memtable, IFileManagerPort fileManager)
         {
             string filename = Guid.NewGuid().ToString();
             Dictionary<string, long> index = new Dictionary<string, long>();
@@ -70,7 +70,7 @@ namespace SortedStorage.Application
             {
                 foreach (var keyValue in memtable.GetData())
                 {
-                    BuildFiles(dataFile, indexFile, keyValue, index);
+                    await BuildFiles(dataFile, indexFile, keyValue, index);
                 }
             }
 
@@ -91,11 +91,11 @@ namespace SortedStorage.Application
             return new SSTable(dataFile, index);
         }
 
-        private static void BuildFiles(IFileWriterPort dataFile, IFileWriterPort indexFile, KeyValuePair<string, string> keyValue, Dictionary<string, long> index)
+        private static async Task BuildFiles(IFileWriterPort dataFile, IFileWriterPort indexFile, KeyValuePair<string, string> keyValue, Dictionary<string, long> index)
         {
-            long position = dataFile.Append(KeyValueEntry.ToBytes(keyValue.Key, keyValue.Value));
+            long position = await dataFile.Append(KeyValueEntry.ToBytes(keyValue.Key, keyValue.Value));
             index[keyValue.Key] = position;
-            indexFile.Append(IndexEntry.ToBytes(keyValue.Key, position));
+            await indexFile.Append(IndexEntry.ToBytes(keyValue.Key, position));
         }
 
         public void Dispose() => dataFile?.Dispose();

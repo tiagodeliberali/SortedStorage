@@ -19,13 +19,13 @@ namespace SortedStorage.Tests.Adapter.Out
             Name = name;
         }
 
-        public long Append(byte[] keyValue)
+        public Task<long> Append(byte[] keyValue)
         {
             long position = data.Count;
 
             data.AddRange(keyValue);
 
-            return position;
+            return Task.FromResult(position);
         }
 
         internal IFileReaderPort GetReader() => new FileTestReaderAdapter(Name, data);

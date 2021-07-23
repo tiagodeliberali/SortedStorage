@@ -22,12 +22,12 @@ namespace SortedStorage.Adapter.Out
             file = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite);
         }
 
-        public long Append(byte[] keyValue)
+        public async Task<long> Append(byte[] keyValue)
         {
             long position = file.Seek(0, SeekOrigin.End);
 
-            file.Write(keyValue, 0, keyValue.Length);
-            file.Flush();
+            await file.WriteAsync(keyValue, 0, keyValue.Length);
+            await file.FlushAsync();
 
             return position;
         }

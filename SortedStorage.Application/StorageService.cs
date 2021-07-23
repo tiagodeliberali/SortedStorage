@@ -53,7 +53,7 @@ namespace SortedStorage.Application
             {
                 Debug.WriteLine($"[StorageService] Found memtable readonly file. Finishing pending SSTable creation.");
                 transferMemtable = await ImutableMemtable.BuildFromFile(transferTableFile);
-                ConvertTransferMemtableToSSTable();
+                await ConvertTransferMemtableToSSTable();
             }
         }
 
@@ -90,7 +90,7 @@ namespace SortedStorage.Application
                 transferMemtable = mainMemtable.ToImutable();
                 mainMemtable = await Memtable.LoadFromFile(fileManager.OpenOrCreateToWrite(Guid.NewGuid().ToString(), FileType.MemtableWriteAheadLog));
 
-                ConvertTransferMemtableToSSTable();
+                await ConvertTransferMemtableToSSTable();
             }
             finally
             {
@@ -98,10 +98,10 @@ namespace SortedStorage.Application
             }
         }
 
-        private void ConvertTransferMemtableToSSTable()
+        private async Task ConvertTransferMemtableToSSTable()
         {
             Debug.WriteLine($"[StorageService] transfer table started for file {transferMemtable.GetFileName()}");
-            sstables.AddFirst(SSTable.From(transferMemtable, fileManager));
+            sstables.AddFirst(await SSTable.From(transferMemtable, fileManager));
             transferMemtable.Delete();
             transferMemtable = null;
             Debug.WriteLine($"[StorageService] transfer table completed");
