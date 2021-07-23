@@ -149,6 +149,8 @@ namespace SortedStorage.Application
                 sstables.AddLast(result);
                 sstables.Remove(sstables.Last.Previous);
                 sstables.Remove(sstables.Last.Previous);
+                older.Delete();
+                newer.Delete();
                 Debug.WriteLine($"[StorageService] merge tables completed with file {result.GetFileName()}");
             }
         }

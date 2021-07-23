@@ -8,11 +8,13 @@ namespace SortedStorage.Application
     public class SSTable : IDisposable
     {
         private readonly IFileReaderPort dataFile;
+        private readonly IFileReaderPort indexFile;
         private readonly Dictionary<string, long> index;
 
-        private SSTable(IFileReaderPort dataFile, Dictionary<string, long> index)
+        private SSTable(IFileReaderPort dataFile, IFileReaderPort indexFile, Dictionary<string, long> index)
         {
             this.dataFile = dataFile;
+            this.indexFile = indexFile;
             this.index = index;
         }
 
@@ -57,7 +59,10 @@ namespace SortedStorage.Application
                 }
             }
 
-            return new SSTable(fileManager.OpenToRead(filename, FileType.SSTableData), index);
+            return new SSTable(
+                fileManager.OpenToRead(filename, FileType.SSTableData),
+                fileManager.OpenToRead(filename, FileType.SSTableIndex),
+                index);
         }
 
         public static async Task<SSTable> From(ImutableMemtable memtable, IFileManagerPort fileManager)
@@ -74,7 +79,10 @@ namespace SortedStorage.Application
                 }
             }
 
-            return new SSTable(fileManager.OpenToRead(filename, FileType.SSTableData), index);
+            return new SSTable(
+                fileManager.OpenToRead(filename, FileType.SSTableData),
+                fileManager.OpenToRead(filename, FileType.SSTableIndex),
+                index);
         }
 
         public static async Task<SSTable> Load(IFileReaderPort indexFile, IFileReaderPort dataFile)
@@ -88,7 +96,7 @@ namespace SortedStorage.Application
                 index.Add(entry.Key, entry.Position);
             }
 
-            return new SSTable(dataFile, index);
+            return new SSTable(dataFile, indexFile, index);
         }
 
         private static async Task BuildFiles(IFileWriterPort dataFile, IFileWriterPort indexFile, KeyValuePair<string, string> keyValue, Dictionary<string, long> index)
@@ -99,5 +107,12 @@ namespace SortedStorage.Application
         }
 
         public void Dispose() => dataFile?.Dispose();
+
+        public void Delete()
+        {
+            index.Clear();
+            dataFile.Delete();
+            indexFile.Delete();
+        }
     }
 }
