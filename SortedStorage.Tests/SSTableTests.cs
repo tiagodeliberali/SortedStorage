@@ -118,7 +118,7 @@ namespace SortedStorage.Tests
 
             foreach (var item in entries)
             {
-                await memtable.Add(item.Key, item.Value);
+                memtable.Add(item.Key, item.Value);
             }
 
             SSTable sstable = await SSTable.From(memtable.ToImutable(), fileManager);

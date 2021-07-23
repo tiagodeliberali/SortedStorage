@@ -14,8 +14,8 @@ namespace SortedStorage.Tests
             FileTestWriterAdapter fileWriter = new FileTestWriterAdapter("test");
             Memtable memtable = await Memtable.LoadFromFile(fileWriter);
 
-            await memtable.Add("key", "ação test");
-            await memtable.Add("key", "new content");
+            memtable.Add("key", "ação test");
+            memtable.Add("key", "new content");
 
             memtable.Get("key").Should().Be("new content");
         }
@@ -26,7 +26,7 @@ namespace SortedStorage.Tests
             FileTestWriterAdapter fileWriter = new FileTestWriterAdapter("test");
             Memtable memtable = await Memtable.LoadFromFile(fileWriter);
 
-            await Assert.ThrowsAsync<InvalidEntryValueException>(async () => await memtable.Add("key", StorageConfiguration.TOMBSTONE));
+            await Assert.ThrowsAsync<InvalidEntryValueException>(async () => memtable.Add("key", StorageConfiguration.TOMBSTONE));
         }
 
         [Fact]
@@ -35,8 +35,8 @@ namespace SortedStorage.Tests
             FileTestWriterAdapter fileWriter = new FileTestWriterAdapter("test");
             Memtable memtable = await Memtable.LoadFromFile(fileWriter);
 
-            await memtable.Add("key", "ação test");
-            await memtable.Remove("key");
+            memtable.Add("key", "ação test");
+            memtable.Remove("key");
 
             memtable.Get("key").Should().Be(StorageConfiguration.TOMBSTONE);
 
@@ -57,8 +57,8 @@ namespace SortedStorage.Tests
             FileTestWriterAdapter fileWriter = new FileTestWriterAdapter("test");
             Memtable memtable = await Memtable.LoadFromFile(fileWriter);
 
-            await memtable.Add("firt key", "ação test");
-            await memtable.Add("second key", "você know");
+            memtable.Add("firt key", "ação test");
+            memtable.Add("second key", "você know");
 
             var reader = fileWriter.GetReader();
             reader.Position = 0;
@@ -77,8 +77,8 @@ namespace SortedStorage.Tests
             FileTestWriterAdapter fileWriter = new FileTestWriterAdapter("test");
             Memtable memtable = await Memtable.LoadFromFile(fileWriter);
 
-            await memtable.Add("firt key", "ação test");
-            await memtable.Add("second key", "você know");
+            memtable.Add("firt key", "ação test");
+            memtable.Add("second key", "você know");
 
             Memtable loadedMemtable = await Memtable.LoadFromFile(fileWriter);
 
@@ -92,8 +92,8 @@ namespace SortedStorage.Tests
             FileTestWriterAdapter fileWriter = new FileTestWriterAdapter("test");
             Memtable memtable = await Memtable.LoadFromFile(fileWriter);
 
-            await memtable.Add("firt key", "ação test");
-            await memtable.Add("second key", "você know");
+            memtable.Add("firt key", "ação test");
+            memtable.Add("second key", "você know");
 
             ImutableMemtable imutableMemtable = memtable.ToImutable();
 
@@ -107,8 +107,8 @@ namespace SortedStorage.Tests
             FileTestWriterAdapter fileWriter = new FileTestWriterAdapter("test");
             Memtable memtable = await Memtable.LoadFromFile(fileWriter);
 
-            await memtable.Add("firt key", "ação test");
-            await memtable.Add("second key", "você know");
+            memtable.Add("firt key", "ação test");
+            memtable.Add("second key", "você know");
 
             ImutableMemtable imutableMemtable = await ImutableMemtable.BuildFromFile(fileWriter.ToReadOnly(FileType.MemtableReadOnly));
 

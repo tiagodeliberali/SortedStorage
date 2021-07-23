@@ -39,29 +39,26 @@ namespace SortedStorage.Application
 
         public bool IsFull() => sortedDictionary.Count >= MAX_SIZE;
 
-        public async Task Add(string key, string value)
+        public void Add(string key, string value)
         {
             if (value == StorageConfiguration.TOMBSTONE)
                 throw new InvalidEntryValueException($"Invalid value '{value}'. It is used as tombstone.");
 
-            await AddEntryWithLock(key, value);
+            AddEntryWithLock(key, value);
         }
 
-        public async Task Remove(string key) => await AddEntryWithLock(key, StorageConfiguration.TOMBSTONE);
+        public void Remove(string key) => AddEntryWithLock(key, StorageConfiguration.TOMBSTONE);
 
-        private async Task AddEntryWithLock(string key, string value)
+        private void AddEntryWithLock(string key, string value)
         {
-            await Task.Factory.StartNew(() =>
+            lock (file)
             {
-                lock (file)
-                {
-                    if (isReadOnly) 
-                        throw new InvalidWriteToReadOnlyException("Tried to add entry to read only memtable");
+                if (isReadOnly)
+                    throw new InvalidWriteToReadOnlyException("Tried to add entry to read only memtable");
 
-                    file.Append(KeyValueEntry.ToBytes(key, value));
-                    sortedDictionary[key] = value;
-                }
-            });
+                file.Append(KeyValueEntry.ToBytes(key, value));
+                sortedDictionary[key] = value;
+            }
         }
 
         public IEnumerable<KeyValuePair<string, string>> GetData() => sortedDictionary.AsEnumerable();

@@ -73,7 +73,7 @@ namespace SortedStorage.Application
             while (isSwitchingMemtables) await Task.Delay(1);
 
             Debug.WriteLine($"[StorageService] Adding key {key}");
-            await mainMemtable.Add(key, value);
+            mainMemtable.Add(key, value);
         }
 
         public async Task Remove(string key)
@@ -82,7 +82,7 @@ namespace SortedStorage.Application
             while (isSwitchingMemtables) await Task.Delay(1);
 
             Debug.WriteLine($"[StorageService] Removing key {key} by adding tombstone value");
-            await mainMemtable.Remove(key);
+            mainMemtable.Remove(key);
         }
 
         /// <summary>
