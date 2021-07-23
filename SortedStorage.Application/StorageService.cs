@@ -14,6 +14,8 @@ namespace SortedStorage.Application
         private Memtable mainMemtable;
         private ImutableMemtable transferMemtable;
 
+        private bool isTransferingMemtable = false;
+
         private StorageService(IFileManagerPort fileManager)
         {
             this.fileManager = fileManager;
@@ -26,7 +28,6 @@ namespace SortedStorage.Application
             var service = new StorageService(fileManager);
 
             service.mainMemtable = await Memtable.LoadFromFile(fileManager.OpenOrCreateToWriteSingleFile(FileType.MemtableWriteAheadLog));
-
 
             await service.LoadSSTables();
             await service.LoadPendingTransferTable();
@@ -56,36 +57,45 @@ namespace SortedStorage.Application
             }
         }
 
+        public async Task TransferMemtableToSSTable()
+        {
+            if (mainMemtable.IsFull() && !isTransferingMemtable)
+                await StoreMainMemtable();
+        }
+
         public async Task Add(string key, string value)
         {
             Debug.WriteLine($"[StorageService] Adding key {key}");
             await mainMemtable.Add(key, value);
-
-            if (mainMemtable.IsFull()) await StoreMainMemtable();
         }
 
         public async Task Remove(string key)
         {
             Debug.WriteLine($"[StorageService] Removing key {key} by adding tombstone value");
             await mainMemtable.Remove(key);
-
-            if (mainMemtable.IsFull()) await StoreMainMemtable();
         }
 
         private async Task StoreMainMemtable()
         {
-            Debug.WriteLine($"[StorageService] main memtable is full");
+            lock (transferMemtable) 
+            {
+                if (isTransferingMemtable) return;
+                isTransferingMemtable = true;
+            }
 
-            // TODO: if main memtable gets full before finishing to create sstable from transfer memtable
-            // we are going to have problems... (must define which kind of problem)
-            transferMemtable = mainMemtable.ToImutable();
-            mainMemtable = await Memtable.LoadFromFile(fileManager.OpenOrCreateToWrite(Guid.NewGuid().ToString(), FileType.MemtableWriteAheadLog));
+            try
+            {
+                Debug.WriteLine($"[StorageService] main memtable is full");
 
-            // TODO: start a new Task to transform transfer memtable to a sstable
-            ConvertTransferMemtableToSSTable();
+                transferMemtable = mainMemtable.ToImutable();
+                mainMemtable = await Memtable.LoadFromFile(fileManager.OpenOrCreateToWrite(Guid.NewGuid().ToString(), FileType.MemtableWriteAheadLog));
 
-            // TODO: Move to a concurrent task
-            await MergeLastSSTables();
+                ConvertTransferMemtableToSSTable();
+            }
+            finally
+            {
+                isTransferingMemtable = false;
+            }
         }
 
         private void ConvertTransferMemtableToSSTable()
@@ -97,7 +107,7 @@ namespace SortedStorage.Application
             Debug.WriteLine($"[StorageService] transfer table completed");
         }
 
-        private async Task MergeLastSSTables()
+        public async Task MergeLastSSTables()
         {
             // TODO: Improve execution criteria and allow better usage of concurrency
             if (sstables.Count > 2)
