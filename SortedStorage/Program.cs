@@ -21,7 +21,7 @@ namespace SortedStorage
 
             while (true)
             {
-                Console.WriteLine("[a (add), r (remove), g (get), q (quit)]>");
+                Console.WriteLine("[a (add), r (remove), g (get), m (merge sstable), t (transfer memtable), q (quit)]>");
                 string action = Console.ReadLine();
 
                 if (action.StartsWith("q"))
@@ -44,15 +44,17 @@ namespace SortedStorage
                 if (action.StartsWith("g"))
                 {
                     string result = await storage.Get(data[1]);
+                    Console.WriteLine(result ?? "no data found");
+                }
 
-                    if (result == null)
-                    {
-                        Console.WriteLine("no data found");
-                    }
-                    else
-                    {
-                        Console.WriteLine(result);
-                    }
+                if (action.StartsWith("m"))
+                {
+                    await storage.MergeLastSSTables();
+                }
+
+                if (action.StartsWith("t"))
+                {
+                    await storage.TransferMemtableToSSTable();
                 }
             }
 
