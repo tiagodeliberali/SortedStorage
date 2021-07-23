@@ -12,6 +12,8 @@ namespace SortedStorage.Application
         private readonly SortedDictionary<string, string> sortedDictionary = new SortedDictionary<string, string>();
         private readonly IFileWriterPort file;
 
+        private bool isReadOnly = false;
+
         private Memtable(IFileWriterPort file)
         {
             this.file = file;
@@ -53,6 +55,9 @@ namespace SortedStorage.Application
             {
                 lock (file)
                 {
+                    if (isReadOnly) 
+                        throw new InvalidWriteToReadOnlyException("Tried to add entry to read only memtable");
+
                     file.Append(KeyValueEntry.ToBytes(key, value));
                     sortedDictionary[key] = value;
                 }
@@ -73,6 +78,7 @@ namespace SortedStorage.Application
         {
             lock (file)
             {
+                isReadOnly = true;
                 return new ImutableMemtable(file.ToReadOnly(FileType.MemtableReadOnly), sortedDictionary);
             }
         }

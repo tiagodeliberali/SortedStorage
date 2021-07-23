@@ -14,7 +14,10 @@ namespace SortedStorage.Application
         private Memtable mainMemtable;
         private ImutableMemtable transferMemtable;
 
+        private bool isSwitchingMemtables = false;
         private bool isTransferingMemtable = false;
+
+        private readonly Object lockRef = new object();
 
         private StorageService(IFileManagerPort fileManager)
         {
@@ -57,30 +60,37 @@ namespace SortedStorage.Application
             }
         }
 
-        public async Task TransferMemtableToSSTable()
-        {
-            if (mainMemtable.IsFull() && !isTransferingMemtable)
-                await StoreMainMemtable();
-        }
-
         public async Task Add(string key, string value)
         {
+            // TODO: find a better pattern for this
+            while (isSwitchingMemtables) await Task.Delay(1);
+
             Debug.WriteLine($"[StorageService] Adding key {key}");
             await mainMemtable.Add(key, value);
         }
 
         public async Task Remove(string key)
         {
+            // TODO: find a better pattern for this
+            while (isSwitchingMemtables) await Task.Delay(1);
+
             Debug.WriteLine($"[StorageService] Removing key {key} by adding tombstone value");
             await mainMemtable.Remove(key);
         }
 
+        public async Task TransferMemtableToSSTable()
+        {
+            if (mainMemtable.IsFull() && !isTransferingMemtable)
+                await StoreMainMemtable();
+        }
+
         private async Task StoreMainMemtable()
         {
-            lock (transferMemtable) 
+            lock (lockRef) 
             {
                 if (isTransferingMemtable) return;
                 isTransferingMemtable = true;
+                isSwitchingMemtables = true;
             }
 
             try
@@ -90,11 +100,14 @@ namespace SortedStorage.Application
                 transferMemtable = mainMemtable.ToImutable();
                 mainMemtable = await Memtable.LoadFromFile(fileManager.OpenOrCreateToWrite(Guid.NewGuid().ToString(), FileType.MemtableWriteAheadLog));
 
+                isSwitchingMemtables = false;
+
                 await ConvertTransferMemtableToSSTable();
             }
             finally
             {
                 isTransferingMemtable = false;
+                isSwitchingMemtables = false;
             }
         }
 
