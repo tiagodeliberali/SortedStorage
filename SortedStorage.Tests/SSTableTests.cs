@@ -14,7 +14,7 @@ namespace SortedStorage.Tests
         public async Task Build_from_imutable_table_keeps_data()
         {
             FileTestManagerAdapter fileManager = new FileTestManagerAdapter();
-            SSTable sstable = await BuildSSTableFromImutableMemtable(fileManager, new List<KeyValueEntry> { 
+            SSTable sstable = await BuildSSTableFromImutableMemtable(fileManager, new List<KeyValueEntry> {
                 new KeyValueEntry("key1", "value1"),
                 new KeyValueEntry("key2", "value2")
             });
@@ -37,7 +37,7 @@ namespace SortedStorage.Tests
             indexList.AddRange(IndexEntry.ToBytes("key2", secondRegisterPosition));
             var indexFile = new FileTestReaderAdapter("index", indexList);
 
-            SSTable sstable = await SSTable .Load(indexFile, dataFile);
+            SSTable sstable = await SSTable.Load(indexFile, dataFile);
 
             (await sstable.Get("key1")).Should().Be("value1");
             (await sstable.Get("key2")).Should().Be("value2");

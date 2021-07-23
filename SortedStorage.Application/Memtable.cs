@@ -41,7 +41,7 @@ namespace SortedStorage.Application
         {
             if (value == StorageConfiguration.TOMBSTONE)
                 throw new InvalidEntryValueException($"Invalid value '{value}'. It is used as tombstone.");
-            
+
             await AddEntryWithLock(key, value);
         }
 
@@ -56,7 +56,7 @@ namespace SortedStorage.Application
                     file.Append(KeyValueEntry.ToBytes(key, value));
                     sortedDictionary[key] = value;
                 }
-            });   
+            });
         }
 
         public IEnumerable<KeyValuePair<string, string>> GetData() => sortedDictionary.AsEnumerable();

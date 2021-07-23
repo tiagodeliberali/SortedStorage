@@ -67,7 +67,7 @@ namespace SortedStorage.Application
         public async Task Remove(string key)
         {
             Debug.WriteLine($"[StorageService] Removing key {key} by adding tombstone value");
-            await mainMemtable .Remove(key);
+            await mainMemtable.Remove(key);
 
             if (mainMemtable.IsFull()) await StoreMainMemtable();
         }

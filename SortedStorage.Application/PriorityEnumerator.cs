@@ -14,7 +14,7 @@ namespace SortedStorage.Application
 
         public async IAsyncEnumerable<KeyValuePair<string, string>> GetAll()
         {
-            SortedDictionary<string, IAsyncEnumerator<KeyValuePair<string, string>>> enumerators = 
+            SortedDictionary<string, IAsyncEnumerator<KeyValuePair<string, string>>> enumerators =
                 new SortedDictionary<string, IAsyncEnumerator<KeyValuePair<string, string>>>();
 
             foreach (var item in enumerables)
