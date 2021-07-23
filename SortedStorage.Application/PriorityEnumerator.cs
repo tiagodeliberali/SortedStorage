@@ -14,32 +14,53 @@ namespace SortedStorage.Application
 
         public async IAsyncEnumerable<KeyValuePair<string, string>> GetAll()
         {
-            SortedDictionary<string, IAsyncEnumerator<KeyValuePair<string, string>>> enumerators =
-                new SortedDictionary<string, IAsyncEnumerator<KeyValuePair<string, string>>>();
+            var enumerators = new List<IAsyncEnumerator<KeyValuePair<string, string>>>();
 
             foreach (var item in enumerables)
             {
                 var enumerator = item.GetAsyncEnumerator();
-
                 if (await enumerator.MoveNextAsync())
                 {
-                    enumerators[enumerator.Current.Key] = enumerator;
+                    enumerators.Add(enumerator);
                 }
             }
 
             while (enumerators.Count > 0)
             {
-                var nextEnumerator = enumerators.First();
-                enumerators.Remove(nextEnumerator.Key);
+                var keyValueResult = enumerators
+                    .Select((enumerator, index) => new PriorityEnumeratorEntry(index, enumerator))
+                    .OrderBy(x => x.Enumerator.Current.Key)
+                    .ThenByDescending(x => x.Order)
+                    .First()
+                    .Enumerator
+                    .Current;
 
-                var keyValueResult = nextEnumerator.Value.Current;
+                var sameKeyEnumerators = enumerators
+                    .Where(x => x.Current.Key == keyValueResult.Key)
+                    .ToList();
 
-                if (await nextEnumerator.Value.MoveNextAsync())
+                foreach (var item in sameKeyEnumerators)
                 {
-                    enumerators[nextEnumerator.Value.Current.Key] = nextEnumerator.Value;
+                    if (!(await item.MoveNextAsync()))
+                    {
+                        enumerators.Remove(item);
+                    }
                 }
+                
 
                 yield return keyValueResult;
+            }
+        }
+
+        class PriorityEnumeratorEntry
+        {
+            public int Order { get; }
+            public IAsyncEnumerator<KeyValuePair<string, string>> Enumerator { get; }
+
+            public PriorityEnumeratorEntry(int order, IAsyncEnumerator<KeyValuePair<string, string>> enumerator)
+            {
+                Order = order;
+                Enumerator = enumerator;
             }
         }
     }

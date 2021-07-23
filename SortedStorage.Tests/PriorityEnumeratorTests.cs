@@ -142,13 +142,13 @@ namespace SortedStorage.Tests
 
             var list2 = new Dictionary<string, string>()
             {
-                ["b"] = "test_b",
+                ["c"] = "test_c",
                 ["d"] = "test_d-2"
             };
 
             var list3 = new Dictionary<string, string>()
             {
-                ["c"] = "test_c",
+                ["b"] = "test_b",
                 ["d"] = "test_d-3",
             };
 
@@ -173,6 +173,44 @@ namespace SortedStorage.Tests
             (await enumerator.MoveNextAsync()).Should().BeTrue();
             enumerator.Current.Key.Should().Be("d");
             enumerator.Current.Value.Should().Be("test_d-3");
+
+            (await enumerator.MoveNextAsync()).Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task Same_key_in_initial_position_moves_iterator_to_next_key()
+        {
+            // Arrange
+            var list1 = new Dictionary<string, string>()
+            {
+                ["a"] = "test_a-1",
+                ["c"] = "test_c"
+            };
+
+            var list2 = new Dictionary<string, string>()
+            {
+                ["a"] = "test_a-2",
+                ["d"] = "test_d"
+            };
+
+            PriorityEnumerator priorityEnumerator = new PriorityEnumerator(new List<IAsyncEnumerable<KeyValuePair<string, string>>>()
+            {
+                ToAsyncEnumerable(list1), ToAsyncEnumerable(list2)
+            });
+
+            // Act
+            var enumerator = priorityEnumerator.GetAll().GetAsyncEnumerator();
+
+            // Assert
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
+            enumerator.Current.Key.Should().Be("a");
+            enumerator.Current.Value.Should().Be("test_a-2");
+
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
+            enumerator.Current.Key.Should().Be("c");
+
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
+            enumerator.Current.Key.Should().Be("d");
 
             (await enumerator.MoveNextAsync()).Should().BeFalse();
         }

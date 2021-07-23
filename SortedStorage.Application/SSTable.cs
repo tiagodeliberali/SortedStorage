@@ -43,7 +43,7 @@ namespace SortedStorage.Application
         public async Task<SSTable> Merge(SSTable otherTable, IFileManagerPort fileManager)
         {
             PriorityEnumerator priorityEnumerator = new PriorityEnumerator(
-                new IAsyncEnumerable<KeyValuePair<string, string>>[] { otherTable.GetAll(), GetAll() });
+                new IAsyncEnumerable<KeyValuePair<string, string>>[] { GetAll(), otherTable.GetAll() });
 
             string filename = Guid.NewGuid().ToString();
             Dictionary<string, long> index = new Dictionary<string, long>();
