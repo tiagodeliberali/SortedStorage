@@ -25,6 +25,13 @@ namespace SortedStorage.Application
             sstables = new LinkedList<SSTable>();
         }
 
+        /// <summary>
+        ///     Build a new instance of storage service. It verifies if there are memtable, transfer memtable and sstable files in disk to guarantee
+        ///     that data will be reloaded correctly. If a transfer memtable file is found, the convertion to a memtable is finished.
+        ///     You should keep only one instance running. It will (hopefully) deal with concurrency.
+        /// </summary>
+        /// <param name="fileManager">Reference to the implementation of file manager port</param>
+        /// <returns>A loaded storage service instance</returns>
         public static async Task<StorageService> LoadFromFiles(IFileManagerPort fileManager)
         {
             Debug.WriteLine($"[StorageService] Starting database...");
@@ -78,6 +85,12 @@ namespace SortedStorage.Application
             await mainMemtable.Remove(key);
         }
 
+        /// <summary>
+        ///     Transforms the main memtable into a sstable. This process locks to prevent Add and Remove to avoid try to add data after
+        ///     main memtable is turned into readonnly. If locks fails, Add and Remove to the readonly memtable will thrown an exception.
+        ///     Those methods are unlocked as soon as the exchange between main and transfer memtable finishes. The process of converting
+        ///     the transfer memtable into a sstable occurs later.
+        /// </summary>
         public async Task TransferMemtableToSSTable()
         {
             if (mainMemtable.IsFull() && !isTransferingMemtable)
@@ -120,26 +133,38 @@ namespace SortedStorage.Application
             Debug.WriteLine($"[StorageService] transfer table completed");
         }
 
+        /// <summary>
+        ///     Takes the last two sstables and merge than, to create a new sstable. The new sstable is added to list before the removal
+        ///     of the old ones, to guarantee that information will be always available
+        /// </summary>
         public async Task MergeLastSSTables()
         {
-            // TODO: Improve execution criteria and allow better usage of concurrency
             if (sstables.Count > 2)
             {
                 Debug.WriteLine($"[StorageService] merge tables started");
                 SSTable older = sstables.Last.Value;
-                sstables.RemoveLast();
-                Debug.WriteLine($"[StorageService] removing table {older.GetFileName()}");
-
-                SSTable newer = sstables.Last.Value;
-                sstables.RemoveLast();
-                Debug.WriteLine($"[StorageService] removing table {newer.GetFileName()}");
+                SSTable newer = sstables.Last.Previous.Value;
 
                 SSTable result = await older.Merge(newer, fileManager);
                 sstables.AddLast(result);
+                sstables.Remove(sstables.Last.Previous);
+                sstables.Remove(sstables.Last.Previous);
                 Debug.WriteLine($"[StorageService] merge tables completed with file {result.GetFileName()}");
             }
         }
 
+        /// <summary>
+        ///     Search for a key in all available sources. First, try yo get it from main mem table. If not found,
+        ///     checks the transfer memtable if it existst. It will be available while a memtable is being translated to a sstable.
+        ///     In the end, try to get the value from the list of sstables.
+        ///     Search the value at memtables are executed sync, because they are in memory searchs. The search at sstables are async,
+        ///     because search will follow a pointer to a file.
+        /// </summary>
+        /// <param name="key">The key being searched</param>
+        /// <returns>
+        ///     The value associated to the key. If not found, it returns null. If the key is associated with 
+        ///     a tombstone, the result will be null.
+        /// </returns>
         public async Task<string> Get(string key)
         {
             string result = mainMemtable.Get(key)
