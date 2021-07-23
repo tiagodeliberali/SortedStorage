@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace SortedStorage.Application.Port.Out
 {
@@ -7,7 +8,7 @@ namespace SortedStorage.Application.Port.Out
         string Name { get; }
         long Position { get; set; }
 
-        byte[] Read(int size);
+        Task<byte[]> Read(int size);
         bool HasContent();
         void Delete();
     }

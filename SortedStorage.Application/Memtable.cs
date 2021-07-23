@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SortedStorage.Application
 {
@@ -11,37 +12,51 @@ namespace SortedStorage.Application
         private readonly SortedDictionary<string, string> sortedDictionary = new SortedDictionary<string, string>();
         private readonly IFileWriterPort file;
 
-        public Memtable(IFileWriterPort file)
+        private Memtable(IFileWriterPort file)
         {
             this.file = file;
-            LoadFile();
         }
 
-        private void LoadFile()
+        public static async Task<Memtable> LoadFromFile(IFileWriterPort file)
+        {
+            var memtable = new Memtable(file);
+            await memtable.LoadFile();
+
+            return memtable;
+        }
+
+        private async Task LoadFile()
         {
             file.Position = 0;
             while (file.HasContent())
             {
-                KeyValueEntry entry = KeyValueEntry.FromFileReader(file);
+                KeyValueEntry entry = await KeyValueEntry.FromFileReader(file);
                 sortedDictionary[entry.Key] = entry.Value;
             }
         }
 
         public bool IsFull() => sortedDictionary.Count >= MAX_SIZE;
 
-        public void Add(string key, string value)
+        public async Task Add(string key, string value)
         {
             if (value == StorageConfiguration.TOMBSTONE)
                 throw new InvalidEntryValueException($"Invalid value '{value}'. It is used as tombstone.");
-
-            file.Append(KeyValueEntry.ToBytes(key, value));
-            sortedDictionary[key] = value;
+            
+            await AddEntryWithLock(key, value);
         }
 
-        public void Remove(string key)
+        public async Task Remove(string key) => await AddEntryWithLock(key, StorageConfiguration.TOMBSTONE);
+
+        private async Task AddEntryWithLock(string key, string value)
         {
-            file.Append(KeyValueEntry.ToBytes(key, StorageConfiguration.TOMBSTONE));
-            sortedDictionary[key] = StorageConfiguration.TOMBSTONE;
+            await Task.Factory.StartNew(() =>
+            {
+                lock (file)
+                {
+                    file.Append(KeyValueEntry.ToBytes(key, value));
+                    sortedDictionary[key] = value;
+                }
+            });   
         }
 
         public IEnumerable<KeyValuePair<string, string>> GetData() => sortedDictionary.AsEnumerable();
@@ -54,6 +69,12 @@ namespace SortedStorage.Application
 
         public void Dispose() => file?.Dispose();
 
-        public ImutableMemtable ToImutable() => new ImutableMemtable(file.ToReadOnly(FileType.MemtableReadOnly), sortedDictionary);
+        public ImutableMemtable ToImutable()
+        {
+            lock (file)
+            {
+                return new ImutableMemtable(file.ToReadOnly(FileType.MemtableReadOnly), sortedDictionary);
+            }
+        }
     }
 }

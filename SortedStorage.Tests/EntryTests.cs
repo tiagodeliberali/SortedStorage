@@ -3,6 +3,7 @@ using SortedStorage.Application;
 using SortedStorage.Tests.Adapter.Out;
 using System;
 using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace SortedStorage.Tests
@@ -23,14 +24,14 @@ namespace SortedStorage.Tests
         }
 
         [Fact]
-        public void Keyvalue_build_from_file_reader()
+        public async Task Keyvalue_build_from_file_reader()
         {
             FileTestReaderAdapter fileReader = new FileTestReaderAdapter("test");
             KeyValueEntry keyValue = new KeyValueEntry("key", "ação");
             fileReader.LoadForTest(keyValue.ToBytes());
 
             fileReader.Position = 0;
-            KeyValueEntry result = KeyValueEntry.FromFileReader(fileReader);
+            KeyValueEntry result = await KeyValueEntry.FromFileReader(fileReader);
 
             result.Key.Should().Be("key");
             result.Value.Should().Be("ação");

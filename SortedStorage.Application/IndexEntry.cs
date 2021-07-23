@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SortedStorage.Application
 {
@@ -35,13 +36,13 @@ namespace SortedStorage.Application
             return keyValue.ToBytes();
         }
 
-        public static IndexEntry FromIndexFileReader(IFileReaderPort file)
+        public static async Task<IndexEntry> FromIndexFileReader(IFileReaderPort file)
         {
-            byte[] header = file.Read(12);
+            byte[] header = await file.Read(12);
 
             long indexPosition = BitConverter.ToInt64(header, 0);
             int keySize = BitConverter.ToInt32(header, 8);
-            string keyData = Encoding.UTF8.GetString(file.Read(keySize));
+            string keyData = Encoding.UTF8.GetString(await file.Read(keySize));
 
             IndexEntry keyValue = new IndexEntry(keyData, indexPosition);
 

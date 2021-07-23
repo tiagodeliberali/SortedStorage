@@ -3,17 +3,18 @@ using SortedStorage.Application;
 using System;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace SortedStorage
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             string path = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             FileManagerAdapter fileAdapter = new FileManagerAdapter(path);
 
-            var storage = new StorageService(fileAdapter);
+            var storage = await StorageService.LoadFromFiles(fileAdapter);
 
             Console.WriteLine("LSM DB\n------");
             Console.WriteLine($"\nrunnung at {path}");
@@ -32,17 +33,17 @@ namespace SortedStorage
 
                 if (action.StartsWith("a"))
                 {
-                    storage.Add(data[1], data[2]);
+                    await storage.Add(data[1], data[2]);
                 }
 
                 if (action.StartsWith("r"))
                 {
-                    storage.Remove(data[1]);
+                    await storage.Remove(data[1]);
                 }
 
                 if (action.StartsWith("g"))
                 {
-                    string result = storage.Get(data[1]);
+                    string result = await storage.Get(data[1]);
 
                     if (result == null)
                     {

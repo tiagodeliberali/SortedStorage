@@ -1,6 +1,7 @@
 ﻿using SortedStorage.Application;
 using SortedStorage.Application.Port.Out;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace SortedStorage.Adapter.Out
 {
@@ -37,10 +38,10 @@ namespace SortedStorage.Adapter.Out
             File.Delete(Name);
         }
 
-        public byte[] Read(int size)
+        public async Task<byte[]> Read(int size)
         {
             var data = new byte[size];
-            file.Read(data, 0, size);
+            await file.ReadAsync(data, 0, size);
 
             return data;
         }

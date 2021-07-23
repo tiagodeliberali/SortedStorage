@@ -1,6 +1,7 @@
 ﻿using SortedStorage.Application.Port.Out;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SortedStorage.Application
 {
@@ -9,21 +10,27 @@ namespace SortedStorage.Application
         private readonly IFileReaderPort file;
         private SortedDictionary<string, string> sortedDictionary;
 
-        public ImutableMemtable(IFileReaderPort file, SortedDictionary<string, string> sortedDictionary = null)
+        public ImutableMemtable(IFileReaderPort file, SortedDictionary<string, string> sortedDictionary)
         {
             this.file = file;
-            if (sortedDictionary != null) this.sortedDictionary = sortedDictionary;
-            else LoadDataFromFile();
+            this.sortedDictionary = sortedDictionary ?? new SortedDictionary<string, string>();
         }
 
-        private void LoadDataFromFile()
+        public static async Task<ImutableMemtable> BuildFromFile(IFileReaderPort file)
+        {
+            var memtable = new ImutableMemtable(file, null);
+            await memtable.LoadDataFromFile();
+            return memtable;
+        }
+
+        private async Task LoadDataFromFile()
         {
             file.Position = 0;
             sortedDictionary = new SortedDictionary<string, string>();
 
             while (file.HasContent())
             {
-                KeyValueEntry entry = KeyValueEntry.FromFileReader(file);
+                KeyValueEntry entry = await KeyValueEntry.FromFileReader(file);
                 sortedDictionary[entry.Key] = entry.Value;
             }
         }

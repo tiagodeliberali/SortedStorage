@@ -1,6 +1,7 @@
 ﻿using SortedStorage.Application.Port.Out;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SortedStorage.Tests.Adapter.Out
 {
@@ -18,7 +19,7 @@ namespace SortedStorage.Tests.Adapter.Out
             this.data = data ?? new List<byte>();
         }
 
-        public byte[] Read(int size)
+        public Task<byte[]> Read(int size)
         {
             var result = data
                 .Skip((int)Position)
@@ -27,7 +28,7 @@ namespace SortedStorage.Tests.Adapter.Out
 
             Position += size;
 
-            return result;
+            return Task.FromResult(result);
         }
 
         public bool HasContent() => Position < data.Count - 1;

@@ -3,6 +3,7 @@ using SortedStorage.Application.Port.Out;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SortedStorage.Application
 {
@@ -49,16 +50,16 @@ namespace SortedStorage.Application
             return keyValue.ToBytes();
         }
 
-        public static KeyValueEntry FromFileReader(IFileReaderPort file)
+        public static async Task<KeyValueEntry> FromFileReader(IFileReaderPort file)
         {
-            byte[] header = file.Read(12);
+            byte[] header = await file.Read(12);
 
             uint checksum = BitConverter.ToUInt32(header, 0);
             int keySize = BitConverter.ToInt32(header, 4);
             int valueSize = BitConverter.ToInt32(header, 8);
 
-            string keyData = Encoding.UTF8.GetString(file.Read(keySize));
-            string valueData = Encoding.UTF8.GetString(file.Read(valueSize));
+            string keyData = Encoding.UTF8.GetString(await file.Read(keySize));
+            string valueData = Encoding.UTF8.GetString(await file.Read(valueSize));
 
             KeyValueEntry keyValue = new KeyValueEntry(keyData, valueData);
 

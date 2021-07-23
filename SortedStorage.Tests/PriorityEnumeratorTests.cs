@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using SortedStorage.Application;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace SortedStorage.Tests
@@ -8,7 +9,7 @@ namespace SortedStorage.Tests
     public class PriorityEnumeratorTests
     {
         [Fact]
-        public void Return_ordered_elements_when_sources_are_ordered()
+        public async Task Return_ordered_elements_when_sources_are_ordered()
         {
             // Arrange
             var list1 = new Dictionary<string, string>()
@@ -29,59 +30,59 @@ namespace SortedStorage.Tests
                 ["e"] = "test_d",
             };
 
-            PriorityEnumerator priorityEnumerator = new PriorityEnumerator(new List<IEnumerable<KeyValuePair<string, string>>>()
+            PriorityEnumerator priorityEnumerator = new PriorityEnumerator(new List<IAsyncEnumerable<KeyValuePair<string, string>>>()
             {
-                list3, list2, list1
+                ToAsyncEnumerable(list1), ToAsyncEnumerable(list2), ToAsyncEnumerable(list3)
             });
 
             // Act
-            var enumerator = priorityEnumerator.GetAll().GetEnumerator();
+            var enumerator = priorityEnumerator.GetAll().GetAsyncEnumerator();
 
             // Assert
-            enumerator.MoveNext().Should().BeTrue();
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
             enumerator.Current.Key.Should().Be("a");
 
-            enumerator.MoveNext().Should().BeTrue();
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
             enumerator.Current.Key.Should().Be("b");
 
-            enumerator.MoveNext().Should().BeTrue();
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
             enumerator.Current.Key.Should().Be("c");
 
-            enumerator.MoveNext().Should().BeTrue();
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
             enumerator.Current.Key.Should().Be("d");
 
-            enumerator.MoveNext().Should().BeTrue();
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
             enumerator.Current.Key.Should().Be("e");
 
-            enumerator.MoveNext().Should().BeTrue();
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
             enumerator.Current.Key.Should().Be("f");
 
-            enumerator.MoveNext().Should().BeFalse();
+            (await enumerator.MoveNextAsync()).Should().BeFalse();
         }
 
         [Fact]
-        public void Enumerator_evaluates_after_first_move_next()
+        public async Task Enumerator_evaluates_after_first_move_next()
         {
             // Arrange
             var list1 = new Dictionary<string, string>();
             var list2 = new Dictionary<string, string>();
 
-            PriorityEnumerator priorityEnumerator = new PriorityEnumerator(new IEnumerable<KeyValuePair<string, string>>[]
+            PriorityEnumerator priorityEnumerator = new PriorityEnumerator(new IAsyncEnumerable<KeyValuePair<string, string>>[]
             {
-                list2, list1
+                ToAsyncEnumerable(list1), ToAsyncEnumerable(list2)
             });
 
             // Act
-            var enumerator = priorityEnumerator.GetAll().GetEnumerator();
+            var enumerator = priorityEnumerator.GetAll().GetAsyncEnumerator();
             list1.Add("a", "test_a");
 
             // Assert
-            enumerator.MoveNext().Should().BeTrue();
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
             enumerator.Current.Key.Should().Be("a");
         }
 
         [Fact]
-        public void After_move_next_enumerator_do_not_get_updated_with_new_items()
+        public async Task After_move_next_enumerator_do_not_get_updated_with_new_items()
         {
             // Arrange
             var list1 = new Dictionary<string, string>()
@@ -93,44 +94,44 @@ namespace SortedStorage.Tests
                 ["b"] = "test_b"
             };
 
-            PriorityEnumerator priorityEnumerator = new PriorityEnumerator(new IEnumerable<KeyValuePair<string, string>>[]
+            PriorityEnumerator priorityEnumerator = new PriorityEnumerator(new IAsyncEnumerable<KeyValuePair<string, string>>[]
             {
-                list2, list1
+                ToAsyncEnumerable(list1), ToAsyncEnumerable(list2)
             });
 
             // Act
-            var enumerator = priorityEnumerator.GetAll().GetEnumerator();
-            enumerator.MoveNext();
+            var enumerator = priorityEnumerator.GetAll().GetAsyncEnumerator();
+            await enumerator.MoveNextAsync();
             list1.Add("c", "test_c");
 
             // Assert
-            enumerator.MoveNext().Should().BeTrue();
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
             enumerator.Current.Key.Should().Be("b");
 
-            enumerator.MoveNext().Should().BeFalse();
+            (await enumerator.MoveNextAsync()).Should().BeFalse();
         }
 
         [Fact]
-        public void Empty_enumerators_creates_an_empty_enumerator()
+        public async Task Empty_enumerators_creates_an_empty_enumerator()
         {
             // Arrange
             var list1 = new Dictionary<string, string>();
             var list2 = new Dictionary<string, string>();
 
-            PriorityEnumerator priorityEnumerator = new PriorityEnumerator(new IEnumerable<KeyValuePair<string, string>>[]
+            PriorityEnumerator priorityEnumerator = new PriorityEnumerator(new IAsyncEnumerable<KeyValuePair<string, string>>[]
             {
-                list2, list1
+                ToAsyncEnumerable(list1), ToAsyncEnumerable(list2)
             });
 
             // Act
-            var enumerator = priorityEnumerator.GetAll().GetEnumerator();
+            var enumerator = priorityEnumerator.GetAll().GetAsyncEnumerator();
 
             // Assert
-            enumerator.MoveNext().Should().BeFalse();
+            (await enumerator.MoveNextAsync()).Should().BeFalse();
         }
 
         [Fact]
-        public void Same_key_preserve_values_of_last_enumerator()
+        public async Task Same_key_preserve_values_of_last_enumerator()
         {
             // Arrange
             var list1 = new Dictionary<string, string>()
@@ -151,29 +152,37 @@ namespace SortedStorage.Tests
                 ["d"] = "test_d-3",
             };
 
-            PriorityEnumerator priorityEnumerator = new PriorityEnumerator(new List<IEnumerable<KeyValuePair<string, string>>>()
+            PriorityEnumerator priorityEnumerator = new PriorityEnumerator(new List<IAsyncEnumerable<KeyValuePair<string, string>>>()
             {
-                list3, list2, list1
+                ToAsyncEnumerable(list1), ToAsyncEnumerable(list2), ToAsyncEnumerable(list3)
             });
 
             // Act
-            var enumerator = priorityEnumerator.GetAll().GetEnumerator();
+            var enumerator = priorityEnumerator.GetAll().GetAsyncEnumerator();
 
             // Assert
-            enumerator.MoveNext().Should().BeTrue();
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
             enumerator.Current.Key.Should().Be("a");
 
-            enumerator.MoveNext().Should().BeTrue();
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
             enumerator.Current.Key.Should().Be("b");
 
-            enumerator.MoveNext().Should().BeTrue();
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
             enumerator.Current.Key.Should().Be("c");
 
-            enumerator.MoveNext().Should().BeTrue();
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
             enumerator.Current.Key.Should().Be("d");
             enumerator.Current.Value.Should().Be("test_d-3");
 
-            enumerator.MoveNext().Should().BeFalse();
+            (await enumerator.MoveNextAsync()).Should().BeFalse();
+        }
+
+        public static async IAsyncEnumerable<T> ToAsyncEnumerable<T>(IEnumerable<T> enumerable)
+        {
+            foreach (var item in enumerable)
+            {
+                yield return await Task.FromResult(item);
+            }
         }
     }
 }

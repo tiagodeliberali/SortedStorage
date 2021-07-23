@@ -5,22 +5,23 @@ namespace SortedStorage.Application
 {
     public class PriorityEnumerator
     {
-        private readonly IEnumerable<IEnumerable<KeyValuePair<string, string>>> enumerables;
+        private readonly IEnumerable<IAsyncEnumerable<KeyValuePair<string, string>>> enumerables;
 
-        public PriorityEnumerator(IEnumerable<IEnumerable<KeyValuePair<string, string>>> enumerables)
+        public PriorityEnumerator(IEnumerable<IAsyncEnumerable<KeyValuePair<string, string>>> enumerables)
         {
             this.enumerables = enumerables;
         }
 
-        public IEnumerable<KeyValuePair<string, string>> GetAll()
+        public async IAsyncEnumerable<KeyValuePair<string, string>> GetAll()
         {
-            SortedDictionary<string, IEnumerator<KeyValuePair<string, string>>> enumerators = new SortedDictionary<string, IEnumerator<KeyValuePair<string, string>>>();
+            SortedDictionary<string, IAsyncEnumerator<KeyValuePair<string, string>>> enumerators = 
+                new SortedDictionary<string, IAsyncEnumerator<KeyValuePair<string, string>>>();
 
             foreach (var item in enumerables)
             {
-                var enumerator = item.GetEnumerator();
+                var enumerator = item.GetAsyncEnumerator();
 
-                if (enumerator.MoveNext())
+                if (await enumerator.MoveNextAsync())
                 {
                     enumerators[enumerator.Current.Key] = enumerator;
                 }
@@ -33,7 +34,7 @@ namespace SortedStorage.Application
 
                 var keyValueResult = nextEnumerator.Value.Current;
 
-                if (nextEnumerator.Value.MoveNext())
+                if (await nextEnumerator.Value.MoveNextAsync())
                 {
                     enumerators[nextEnumerator.Value.Current.Key] = nextEnumerator.Value;
                 }
