@@ -33,12 +33,12 @@ namespace SortedStorage
 
                 if (action.StartsWith("a"))
                 {
-                    await storage.Add(data[1], data[2]);
+                    storage.Add(data[1], data[2]);
                 }
 
                 if (action.StartsWith("r"))
                 {
-                    await storage.Remove(data[1]);
+                    storage.Remove(data[1]);
                 }
 
                 if (action.StartsWith("g"))

@@ -26,7 +26,7 @@ namespace SortedStorage.Tests
             FileTestWriterAdapter fileWriter = new FileTestWriterAdapter("test");
             Memtable memtable = await Memtable.LoadFromFile(fileWriter);
 
-            await Assert.ThrowsAsync<InvalidEntryValueException>(async () => memtable.Add("key", StorageConfiguration.TOMBSTONE));
+            Assert.Throws<InvalidEntryValueException>(() => memtable.Add("key", StorageConfiguration.TOMBSTONE));
         }
 
         [Fact]

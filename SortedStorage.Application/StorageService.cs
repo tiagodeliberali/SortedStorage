@@ -3,18 +3,20 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SortedStorage.Application
 {
     public class StorageService
     {
+        public static ManualResetEvent switchingMemtables = new ManualResetEvent(true);
+
         private readonly IFileManagerPort fileManager;
         private readonly LinkedList<SSTable> sstables;
         private Memtable mainMemtable;
         private ImutableMemtable transferMemtable;
 
-        private bool isSwitchingMemtables = false;
         private bool isTransferingMemtable = false;
 
         private readonly Object lockRef = new object();
@@ -67,19 +69,17 @@ namespace SortedStorage.Application
             }
         }
 
-        public async Task Add(string key, string value)
+        public void Add(string key, string value)
         {
-            // TODO: find a better pattern for this
-            while (isSwitchingMemtables) await Task.Delay(1);
+            switchingMemtables.WaitOne();
 
             Debug.WriteLine($"[StorageService] Adding key {key}");
             mainMemtable.Add(key, value);
         }
 
-        public async Task Remove(string key)
+        public void Remove(string key)
         {
-            // TODO: find a better pattern for this
-            while (isSwitchingMemtables) await Task.Delay(1);
+            switchingMemtables.WaitOne();
 
             Debug.WriteLine($"[StorageService] Removing key {key} by adding tombstone value");
             mainMemtable.Remove(key);
@@ -103,7 +103,7 @@ namespace SortedStorage.Application
             {
                 if (isTransferingMemtable) return;
                 isTransferingMemtable = true;
-                isSwitchingMemtables = true;
+                switchingMemtables.Reset();
             }
 
             try
@@ -113,14 +113,13 @@ namespace SortedStorage.Application
                 transferMemtable = mainMemtable.ToImutable();
                 mainMemtable = await Memtable.LoadFromFile(fileManager.OpenOrCreateToWrite(Guid.NewGuid().ToString(), FileType.MemtableWriteAheadLog));
 
-                isSwitchingMemtables = false;
+                switchingMemtables.Set();
 
                 await ConvertTransferMemtableToSSTable();
             }
             finally
             {
                 isTransferingMemtable = false;
-                isSwitchingMemtables = false;
             }
         }
 
