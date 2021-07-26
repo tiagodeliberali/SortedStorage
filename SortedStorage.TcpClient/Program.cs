@@ -18,10 +18,10 @@ namespace SortedStorage.TcpClient
                     var client = new AsynchronousClient();
                     client.StartClient();
 
-                    DisplayResponse(client.Send(TcpRequest.Upsert("10", "novo 10")));
-                    DisplayResponse(client.Send(TcpRequest.Get("10")));
-                    DisplayResponse(client.Send(TcpRequest.Remove("10")));
-                    DisplayResponse(client.Send(TcpRequest.Get("10")));
+                    DisplayResponse(client.Send(TcpRequest.Upsert(id, $"novo {id}")));
+                    DisplayResponse(client.Send(TcpRequest.Get(id)));
+                    DisplayResponse(client.Send(TcpRequest.Remove(id)));
+                    DisplayResponse(client.Send(TcpRequest.Get(id)));
 
                     Console.WriteLine($"[{nameof(Main)}] FINISHED CONSUMER {id}");
                 });
