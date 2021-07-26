@@ -9,9 +9,10 @@ namespace SortedStorage.TcpClient
     {
         public static void Main(String[] args)
         {
+            var r = new Random();
             for (int i = 0; i < 100; i++)
             {
-                string id = i.ToString();
+                string id = r.Next(0, 10000).ToString();
 
                 Task.Run(() =>
                 {
@@ -20,7 +21,7 @@ namespace SortedStorage.TcpClient
 
                     DisplayResponse(client.Send(TcpRequest.Upsert(id, $"novo {id}")));
                     DisplayResponse(client.Send(TcpRequest.Get(id)));
-                    DisplayResponse(client.Send(TcpRequest.Remove(id)));
+                    // DisplayResponse(client.Send(TcpRequest.Remove(id)));
                     DisplayResponse(client.Send(TcpRequest.Get(id)));
 
                     Console.WriteLine($"[{nameof(Main)}] FINISHED CONSUMER {id}");

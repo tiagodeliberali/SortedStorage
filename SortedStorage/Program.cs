@@ -19,18 +19,27 @@ namespace SortedStorage
             var storage = await StorageService.LoadFromFiles(fileAdapter);
 
             StorageListener tcpServer = new StorageListener(storage);
+
+            var mergeTask = Task.Run(async () =>
+            {
+                await Task.Delay(TimeSpan.FromSeconds(10));
+                while (true)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(20));
+                    await storage.MergeLastSSTables();
+                }
+            });
+
+            var transferTask = Task.Run(async () =>
+            {
+                while (true)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(20));
+                    await storage.TransferMemtableToSSTable();
+                }
+            });
+
             tcpServer.StartListening();
-
-
-            //    if (action.StartsWith("m"))
-            //    {
-            //        await storage.MergeLastSSTables();
-            //    }
-
-            //    if (action.StartsWith("t"))
-            //    {
-            //        await storage.TransferMemtableToSSTable();
-            //    }
 
             Console.WriteLine($"[{nameof(Main)}] bye!!");
         }
