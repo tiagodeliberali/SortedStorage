@@ -1,7 +1,6 @@
 ﻿using SortedStorage.Application.Port.Out;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,14 +35,14 @@ namespace SortedStorage.Application
         /// <returns>A loaded storage service instance</returns>
         public static async Task<StorageService> LoadFromFiles(IFileManagerPort fileManager)
         {
-            Debug.WriteLine($"[StorageService] Starting database...");
+            Console.WriteLine($"[{nameof(StorageService)}] Starting database...");
             var service = new StorageService(fileManager);
 
             service.mainMemtable = await Memtable.LoadFromFile(fileManager.OpenOrCreateToWriteSingleFile(FileType.MemtableWriteAheadLog));
 
             await service.LoadSSTables();
             await service.LoadPendingTransferTable();
-            Debug.WriteLine($"[StorageService] Database started!");
+            Console.WriteLine($"[{nameof(StorageService)}] Database started!");
 
             return service;
         }
@@ -63,7 +62,7 @@ namespace SortedStorage.Application
 
             if (transferTableFile != null)
             {
-                Debug.WriteLine($"[StorageService] Found memtable readonly file. Finishing pending SSTable creation.");
+                Console.WriteLine($"[{nameof(StorageService)}] Found memtable readonly file. Finishing pending SSTable creation.");
                 transferMemtable = await ImutableMemtable.BuildFromFile(transferTableFile);
                 await ConvertTransferMemtableToSSTable();
             }
@@ -73,7 +72,7 @@ namespace SortedStorage.Application
         {
             switchingMemtables.WaitOne();
 
-            Debug.WriteLine($"[StorageService] Adding key {key}");
+            Console.WriteLine($"[{nameof(StorageService)}] Adding key {key}");
             mainMemtable.Add(key, value);
         }
 
@@ -81,7 +80,7 @@ namespace SortedStorage.Application
         {
             switchingMemtables.WaitOne();
 
-            Debug.WriteLine($"[StorageService] Removing key {key} by adding tombstone value");
+            Console.WriteLine($"[{nameof(StorageService)}] Removing key {key} by adding tombstone value");
             mainMemtable.Remove(key);
         }
 
@@ -108,7 +107,7 @@ namespace SortedStorage.Application
 
             try
             {
-                Debug.WriteLine($"[StorageService] main memtable is full");
+                Console.WriteLine($"[{nameof(StorageService)}] main memtable is full");
 
                 transferMemtable = mainMemtable.ToImutable();
                 mainMemtable = await Memtable.LoadFromFile(fileManager.OpenOrCreateToWrite(Guid.NewGuid().ToString(), FileType.MemtableWriteAheadLog));
@@ -125,11 +124,11 @@ namespace SortedStorage.Application
 
         private async Task ConvertTransferMemtableToSSTable()
         {
-            Debug.WriteLine($"[StorageService] transfer table started for file {transferMemtable.GetFileName()}");
+            Console.WriteLine($"[{nameof(StorageService)}] transfer table started for file {transferMemtable.GetFileName()}");
             sstables.AddFirst(await SSTable.From(transferMemtable, fileManager));
             transferMemtable.Delete();
             transferMemtable = null;
-            Debug.WriteLine($"[StorageService] transfer table completed");
+            Console.WriteLine($"[{nameof(StorageService)}] transfer table completed");
         }
 
         /// <summary>
@@ -140,7 +139,7 @@ namespace SortedStorage.Application
         {
             if (sstables.Count > 2)
             {
-                Debug.WriteLine($"[StorageService] merge tables started");
+                Console.WriteLine($"[{nameof(StorageService)}] merge tables started");
                 SSTable older = sstables.Last.Value;
                 SSTable newer = sstables.Last.Previous.Value;
 
@@ -150,7 +149,7 @@ namespace SortedStorage.Application
                 sstables.Remove(sstables.Last.Previous);
                 older.Delete();
                 newer.Delete();
-                Debug.WriteLine($"[StorageService] merge tables completed with file {result.GetFileName()}");
+                Console.WriteLine($"[{nameof(StorageService)}] merge tables completed with file {result.GetFileName()}");
             }
         }
 
