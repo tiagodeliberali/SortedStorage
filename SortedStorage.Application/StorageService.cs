@@ -1,6 +1,7 @@
 ﻿using SortedStorage.Application.Port.Out;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,7 +19,7 @@ namespace SortedStorage.Application
 
         private bool isTransferingMemtable = false;
 
-        private readonly Object lockRef = new object();
+        private readonly object lockRef = new object();
 
         private StorageService(IFileManagerPort fileManager)
         {
@@ -70,18 +71,20 @@ namespace SortedStorage.Application
 
         public void Add(string key, string value)
         {
+            var stopwatch = Stopwatch.StartNew();
             switchingMemtables.WaitOne();
-
-            Console.WriteLine($"[{nameof(StorageService)}] Adding key {key}");
             mainMemtable.Add(key, value);
+            stopwatch.Stop();
+            SortedStorageApplicationEventSource.Log.ReportUpdateDurationInMs(stopwatch.Elapsed.Ticks);
         }
 
         public void Remove(string key)
         {
+            var stopwatch = Stopwatch.StartNew();
             switchingMemtables.WaitOne();
-
-            Console.WriteLine($"[{nameof(StorageService)}] Removing key {key} by adding tombstone value");
             mainMemtable.Remove(key);
+            stopwatch.Stop();
+            SortedStorageApplicationEventSource.Log.ReportUpdateDurationInMs(stopwatch.Elapsed.Ticks);
         }
 
         /// <summary>
@@ -107,8 +110,6 @@ namespace SortedStorage.Application
 
             try
             {
-                Console.WriteLine($"[{nameof(StorageService)}] main memtable is full");
-
                 transferMemtable = mainMemtable.ToImutable();
                 mainMemtable = await Memtable.LoadFromFile(fileManager.OpenOrCreateToWrite(Guid.NewGuid().ToString(), FileType.MemtableWriteAheadLog));
 
@@ -167,9 +168,12 @@ namespace SortedStorage.Application
         /// </returns>
         public async Task<string> Get(string key)
         {
+            var stopwatch = Stopwatch.StartNew();
             string result = mainMemtable.Get(key)
                 ?? transferMemtable?.Get(key)
                 ?? await GetFromSSTables(key);
+            stopwatch.Stop();
+            SortedStorageApplicationEventSource.Log.ReportGetDurationInMs(stopwatch.Elapsed.Ticks);
 
             return result == StorageConfiguration.TOMBSTONE
                 ? null

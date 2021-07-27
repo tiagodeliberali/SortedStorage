@@ -9,7 +9,7 @@ namespace SortedStorage.TcpClient
 {
     public class AsynchronousClient
     {
-        private const int port = 11000;
+        private const int port = 8080;
 
         private ManualResetEvent connectDone = new ManualResetEvent(false);
         private ManualResetEvent sendDone = new ManualResetEvent(false);
@@ -67,9 +67,6 @@ namespace SortedStorage.TcpClient
             {
                 Socket client = (Socket)ar.AsyncState;
                 client.EndConnect(ar);
-
-                Console.WriteLine($"[{nameof(AsynchronousClient)}] Socket connected to {client.RemoteEndPoint}");
-
                 connectDone.Set();
             }
             catch (Exception e)
@@ -87,8 +84,6 @@ namespace SortedStorage.TcpClient
                 Socket client = (Socket)ar.AsyncState;
 
                 int bytesSent = client.EndSend(ar);
-                Console.WriteLine($"[{nameof(AsynchronousClient)}] Sent {0} bytes to server.", bytesSent);
-
                 sendDone.Set();
             }
             catch (Exception e)
@@ -125,7 +120,6 @@ namespace SortedStorage.TcpClient
                     if (state.ReceivedAllData())
                     {
                         response = state.GetResponse();
-                        Console.WriteLine($"[{nameof(AsynchronousClient)}] Response received size: {state.ReceivedData.Count}");
                         receiveDone.Set();
                     }
                     else

@@ -11,7 +11,7 @@ namespace SortedStorage.TcpServer
     public abstract class SocketListener
     {
         public ManualResetEvent allDone = new ManualResetEvent(false);
-        
+                
         public SocketListener()
         {
         }
@@ -20,7 +20,7 @@ namespace SortedStorage.TcpServer
         {
             IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
             IPAddress ipAddress = ipHostInfo.AddressList[0];
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 11000);
+            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 8080);
 
             Socket listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
@@ -32,12 +32,9 @@ namespace SortedStorage.TcpServer
                 while (true)
                 {
                     allDone.Reset();
-
-                    Console.WriteLine($"[{nameof(SocketListener)}] Waiting for a connection...");
                     listener.BeginAccept(
                         new AsyncCallback(AcceptCallback),
                         listener);
-
                     allDone.WaitOne();
                 }
             }
@@ -49,7 +46,7 @@ namespace SortedStorage.TcpServer
 
         public void AcceptCallback(IAsyncResult ar)
         {
-            Console.WriteLine($"[{nameof(SocketListener)}] Receive new connection");
+            TcpServiceEventSource.Log.IncrementActiveClients();
             allDone.Set();
 
             Socket listener = (Socket)ar.AsyncState;
@@ -67,11 +64,11 @@ namespace SortedStorage.TcpServer
             int bytesRead = handler.EndReceive(ar);
             if (bytesRead > 0)
             {
+                TcpServiceEventSource.Log.IncrementReadBytes(bytesRead);
                 state.ReceivedData.AddRange(state.Buffer.Take(bytesRead));
 
                 if (state.ReceivedAllData())
                 {
-                    Console.WriteLine($"[{nameof(SocketListener)}] Read {state.ReceivedData.Count} bytes from socket");
                     TcpResponse response = await ProcessRequest(state.GetRequest());
                     state.Clear();
 
@@ -94,7 +91,7 @@ namespace SortedStorage.TcpServer
                 Socket handler = (Socket)ar.AsyncState;
 
                 int bytesSent = handler.EndSend(ar);
-                Console.WriteLine($"[{nameof(SocketListener)}] Sent {bytesSent} bytes to client.");
+                TcpServiceEventSource.Log.IncrementSentBytes(bytesSent);
             }
             catch (Exception e)
             {

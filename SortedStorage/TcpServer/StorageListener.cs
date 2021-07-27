@@ -1,5 +1,4 @@
-﻿using SortedStorage.Adapter.Out;
-using SortedStorage.Application;
+﻿using SortedStorage.Application;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

@@ -2,6 +2,7 @@
 using SortedStorage.TcpServer;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace SortedStorage.TcpClient
 {
@@ -10,11 +11,13 @@ namespace SortedStorage.TcpClient
         public static void Main(String[] args)
         {
             var r = new Random();
-            for (int i = 0; i < 100; i++)
+            var tasks = new List<Task>();
+
+            for (int i = 0; i < 1000; i++)
             {
                 string id = r.Next(0, 10000).ToString();
 
-                Task.Run(() =>
+                tasks.Add(Task.Run(() =>
                 {
                     var client = new AsynchronousClient();
                     client.StartClient();
@@ -24,11 +27,12 @@ namespace SortedStorage.TcpClient
                     // DisplayResponse(client.Send(TcpRequest.Remove(id)));
                     DisplayResponse(client.Send(TcpRequest.Get(id)));
 
+                    client.Close();
                     Console.WriteLine($"[{nameof(Main)}] FINISHED CONSUMER {id}");
-                });
+                }));
             }
             
-            Console.ReadLine();
+            Task.WaitAll(tasks.ToArray());
         }
 
         private static void DisplayResponse(TcpResponse tcpResponse)
