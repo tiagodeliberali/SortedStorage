@@ -31,7 +31,7 @@ namespace SortedStorage.TcpClient
                     Console.WriteLine($"[{nameof(Main)}] FINISHED CONSUMER {id}");
                 }));
             }
-            
+
             Task.WaitAll(tasks.ToArray());
         }
 
