@@ -11,7 +11,7 @@ namespace SortedStorage.TcpServer
     public abstract class SocketListener
     {
         public ManualResetEvent allDone = new ManualResetEvent(false);
-                
+
         public SocketListener()
         {
         }
@@ -46,42 +46,56 @@ namespace SortedStorage.TcpServer
 
         public void AcceptCallback(IAsyncResult ar)
         {
-            TcpServiceEventSource.Log.IncrementActiveClients();
-            allDone.Set();
+            try
+            {
+                TcpServiceEventSource.Log.IncrementActiveClients();
+                allDone.Set();
 
-            Socket listener = (Socket)ar.AsyncState;
-            Socket handler = listener.EndAccept(ar);
+                Socket listener = (Socket)ar.AsyncState;
+                Socket handler = listener.EndAccept(ar);
 
-            TcpStateObject state = new TcpStateObject(handler);
-            state.WorkSocket.BeginReceive(state.Buffer, 0, TcpStateObject.BufferSize, 0, new AsyncCallback(ReadCallback), state);
+                TcpStateObject state = new TcpStateObject(handler);
+                state.WorkSocket.BeginReceive(state.Buffer, 0, TcpStateObject.BufferSize, 0, new AsyncCallback(ReadCallback), state);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"[{nameof(SocketListener)}] {e}");
+            }
         }
 
         public async void ReadCallback(IAsyncResult ar)
         {
-            TcpStateObject state = (TcpStateObject)ar.AsyncState;
-            Socket handler = state.WorkSocket;
-
-            int bytesRead = handler.EndReceive(ar);
-            if (bytesRead > 0)
+            try
             {
-                TcpServiceEventSource.Log.IncrementReadBytes(bytesRead);
-                state.ReceivedData.AddRange(state.Buffer.Take(bytesRead));
+                TcpStateObject state = (TcpStateObject)ar.AsyncState;
+                Socket handler = state.WorkSocket;
 
-                if (state.ReceivedAllData())
+                int bytesRead = handler.EndReceive(ar);
+                if (bytesRead > 0)
                 {
-                    TcpResponse response = await ProcessRequest(state.GetRequest());
-                    state.Clear();
+                    TcpServiceEventSource.Log.IncrementReadBytes(bytesRead);
+                    state.ReceivedData.AddRange(state.Buffer.Take(bytesRead));
 
-                    Send(handler, response.ToBytes());
+                    if (state.ReceivedAllData())
+                    {
+                        TcpResponse response = await ProcessRequest(state.GetRequest());
+                        state.Clear();
+
+                        Send(handler, response.ToBytes());
+                    }
+
+                    handler.BeginReceive(state.Buffer, 0, TcpStateObject.BufferSize, 0, new AsyncCallback(ReadCallback), state);
                 }
-
-                handler.BeginReceive(state.Buffer, 0, TcpStateObject.BufferSize, 0, new AsyncCallback(ReadCallback), state);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"[{nameof(SocketListener)}] {e}");
             }
         }
 
         protected abstract Task<TcpResponse> ProcessRequest(TcpRequest tcpRequest);
 
-        private void Send(Socket handler, IEnumerable<byte> data) => 
+        private void Send(Socket handler, IEnumerable<byte> data) =>
             handler.BeginSend(data.ToArray(), 0, data.Count(), 0, new AsyncCallback(SendCallback), handler);
 
         private void SendCallback(IAsyncResult ar)

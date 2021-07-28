@@ -101,7 +101,7 @@ namespace SortedStorage.Application
 
         private async Task StoreMainMemtable()
         {
-            lock (lockRef) 
+            lock (lockRef)
             {
                 if (isTransferingMemtable) return;
                 isTransferingMemtable = true;

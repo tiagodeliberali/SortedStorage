@@ -46,7 +46,7 @@ namespace SortedStorage.Application
                         enumerators.Remove(item);
                     }
                 }
-                
+
 
                 yield return keyValueResult;
             }
