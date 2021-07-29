@@ -1,6 +1,7 @@
 ﻿using SortedStorage.Application.Port.Out;
+using SortedStorage.Application.SymbolTable;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SortedStorage.Application
@@ -8,12 +9,12 @@ namespace SortedStorage.Application
     public class ImutableMemtable
     {
         private readonly IFileReaderPort file;
-        private SortedDictionary<string, string> sortedDictionary;
+        private RedBlackTree<string, string> sortedDictionary;
 
-        public ImutableMemtable(IFileReaderPort file, SortedDictionary<string, string> sortedDictionary)
+        public ImutableMemtable(IFileReaderPort file, RedBlackTree<string, string> sortedDictionary)
         {
             this.file = file;
-            this.sortedDictionary = sortedDictionary ?? new SortedDictionary<string, string>();
+            this.sortedDictionary = sortedDictionary ?? new RedBlackTree<string, string>();
         }
 
         public static async Task<ImutableMemtable> BuildFromFile(IFileReaderPort file)
@@ -26,7 +27,7 @@ namespace SortedStorage.Application
         private async Task LoadDataFromFile()
         {
             file.Position = 0;
-            sortedDictionary = new SortedDictionary<string, string>();
+            sortedDictionary = new RedBlackTree<string, string>();
 
             while (file.HasContent())
             {
@@ -35,12 +36,23 @@ namespace SortedStorage.Application
             }
         }
 
-        public IEnumerable<KeyValuePair<string, string>> GetData() => sortedDictionary.AsEnumerable();
+        public IEnumerable<KeyValuePair<string, string>> GetData()
+        {
+            foreach (var item in sortedDictionary.GetAll())
+            {
+                yield return KeyValuePair.Create(item.Key, item.Value);
+            }
+        }
 
         public void Delete() => file?.Delete();
 
         public string GetFileName() => file.Name;
 
-        public string Get(string key) => sortedDictionary.GetValueOrDefault(key);
+        public string Get(string key) => sortedDictionary.Get(key);
+
+        internal List<KeyValuePair<string, string>> GetInRange(string start, string end)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -115,5 +115,31 @@ namespace SortedStorage.Tests
             imutableMemtable.Get("firt key").Should().Be("ação test");
             imutableMemtable.Get("second key").Should().Be("você know");
         }
+
+        [Fact]
+        public async Task Get_information_inside_range_containing_both_extremes()
+        {
+            FileTestWriterAdapter fileWriter = new FileTestWriterAdapter("test");
+            Memtable memtable = await Memtable.LoadFromFile(fileWriter);
+
+            memtable.Add("c", "value c");
+            memtable.Add("e", "value e");
+            memtable.Add("b", "value b");
+            memtable.Add("d", "value d");
+            memtable.Add("a", "value a");
+
+            var enumerator = memtable.GetInRange("b", "d").GetAsyncEnumerator();
+
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
+            enumerator.Current.Key.Should().Be("b");
+
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
+            enumerator.Current.Key.Should().Be("c");
+
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
+            enumerator.Current.Key.Should().Be("d");
+
+            (await enumerator.MoveNextAsync()).Should().BeFalse();
+        }
     }
 }

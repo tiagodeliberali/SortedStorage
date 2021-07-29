@@ -10,7 +10,7 @@ namespace SortedStorage
 {
     class Program
     {
-        private static EventCounterCollectionModule _events = new EventCounterCollectionModule();
+        private static readonly EventCounterCollectionModule _events = new EventCounterCollectionModule();
 
         static async Task Main(string[] args)
         {

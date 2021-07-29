@@ -1,7 +1,7 @@
 ﻿using SortedStorage.Application.Port.Out;
+using SortedStorage.Application.SymbolTable;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SortedStorage.Application
@@ -9,7 +9,7 @@ namespace SortedStorage.Application
     public class Memtable : IDisposable
     {
         private const int MAX_SIZE = 2;
-        private readonly SortedDictionary<string, string> sortedDictionary = new SortedDictionary<string, string>();
+        private readonly RedBlackTree<string, string> sortedDictionary = new RedBlackTree<string, string>();
         private readonly IFileWriterPort file;
 
         private bool isReadOnly = false;
@@ -37,7 +37,7 @@ namespace SortedStorage.Application
             }
         }
 
-        public bool IsFull() => sortedDictionary.Count >= MAX_SIZE;
+        public bool IsFull() => sortedDictionary.Size >= MAX_SIZE;
 
         public void Add(string key, string value)
         {
@@ -61,9 +61,23 @@ namespace SortedStorage.Application
             }
         }
 
-        public IEnumerable<KeyValuePair<string, string>> GetData() => sortedDictionary.AsEnumerable();
+        public IEnumerable<KeyValuePair<string, string>> GetData()
+        {
+            foreach (var item in sortedDictionary.GetAll())
+            {
+                yield return KeyValuePair.Create(item.Key, item.Value);
+            }
+        }
 
-        public string Get(string key) => sortedDictionary.GetValueOrDefault(key);
+        public string Get(string key) => sortedDictionary.Get(key);
+
+        public async IAsyncEnumerable<KeyValuePair<string, string>> GetInRange(string start, string end)
+        {
+            foreach (var item in sortedDictionary.GetInRange(start, end))
+            {
+                yield return await Task.FromResult(KeyValuePair.Create(item.Key, item.Value));
+            }
+        }
 
         public void DeleteFile() => file?.Delete();
 
