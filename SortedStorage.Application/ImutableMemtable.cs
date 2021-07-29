@@ -44,15 +44,18 @@ namespace SortedStorage.Application
             }
         }
 
+        public async IAsyncEnumerable<KeyValuePair<string, string>> GetInRange(string start, string end)
+        {
+            foreach (var item in sortedDictionary.GetInRange(start, end))
+            {
+                yield return await Task.FromResult(KeyValuePair.Create(item.Key, item.Value));
+            }
+        }
+
         public void Delete() => file?.Delete();
 
         public string GetFileName() => file.Name;
 
         public string Get(string key) => sortedDictionary.Get(key);
-
-        internal List<KeyValuePair<string, string>> GetInRange(string start, string end)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

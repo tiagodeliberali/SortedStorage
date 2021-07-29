@@ -61,6 +61,8 @@ namespace SortedStorage.Application
             }
         }
 
+        public string Get(string key) => sortedDictionary.Get(key);
+
         public IEnumerable<KeyValuePair<string, string>> GetData()
         {
             foreach (var item in sortedDictionary.GetAll())
@@ -68,8 +70,6 @@ namespace SortedStorage.Application
                 yield return KeyValuePair.Create(item.Key, item.Value);
             }
         }
-
-        public string Get(string key) => sortedDictionary.Get(key);
 
         public async IAsyncEnumerable<KeyValuePair<string, string>> GetInRange(string start, string end)
         {

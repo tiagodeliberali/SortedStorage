@@ -37,9 +37,10 @@ namespace SortedStorage.Application
         public static async Task<StorageService> LoadFromFiles(IFileManagerPort fileManager)
         {
             Console.WriteLine($"[{nameof(StorageService)}] Starting database...");
-            var service = new StorageService(fileManager);
-
-            service.mainMemtable = await Memtable.LoadFromFile(fileManager.OpenOrCreateToWriteSingleFile(FileType.MemtableWriteAheadLog));
+            var service = new StorageService(fileManager)
+            {
+                mainMemtable = await Memtable.LoadFromFile(fileManager.OpenOrCreateToWriteSingleFile(FileType.MemtableWriteAheadLog))
+            };
 
             await service.LoadSSTables();
             await service.LoadPendingTransferTable();
@@ -178,6 +179,29 @@ namespace SortedStorage.Application
             return result == StorageConfiguration.TOMBSTONE
                 ? null
                 : result;
+        }
+
+        public async IAsyncEnumerable<KeyValuePair<string, string>> GetInRange(string start, string end)
+        {
+            var enumerables = new List<IAsyncEnumerable<KeyValuePair<string, string>>>
+            {
+                mainMemtable.GetInRange(start, end)
+            };
+
+            if (transferMemtable != null)
+                enumerables.Add(transferMemtable.GetInRange(start, end));
+
+            foreach (var table in sstables)
+            {
+                enumerables.Add(table.GetInRange(start, end));
+            }
+
+            PriorityEnumerator priorityEnumerator = new PriorityEnumerator(enumerables);
+
+            await foreach (var item in priorityEnumerator.GetAll())
+            {
+                yield return item;
+            }
         }
 
         private async Task<string> GetFromSSTables(string key)

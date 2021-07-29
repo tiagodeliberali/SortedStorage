@@ -22,6 +22,8 @@ namespace SortedStorage.TcpServer
 
         public static TcpRequest Get(string key) => new TcpRequest(RequestType.Get, key);
 
+        public static TcpRequest GetInRange(string start, string end) => new TcpRequest(RequestType.GetInRange, start, end);
+
         public static TcpRequest Upsert(string key, string value) => new TcpRequest(RequestType.Upsert, key, value);
 
         public static TcpRequest Remove(string key) => new TcpRequest(RequestType.Remove, key);
@@ -44,6 +46,8 @@ namespace SortedStorage.TcpServer
                     return RequestType.Remove;
                 case 4:
                     return RequestType.Upsert;
+                case 8:
+                    return RequestType.GetInRange;
                 default:
                     throw new InvalidCastException(nameof(typeId));
             }
@@ -59,6 +63,8 @@ namespace SortedStorage.TcpServer
                     return 2;
                 case RequestType.Get:
                     return 1;
+                case RequestType.GetInRange:
+                    return 8;
             }
 
             throw new InvalidCastException(nameof(Type));

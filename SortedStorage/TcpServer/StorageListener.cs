@@ -34,6 +34,14 @@ namespace SortedStorage.TcpServer
                             ? TcpResponse.SuccessResult()
                             : TcpResponse.SuccessGet(new List<KeyValueEntry> { new KeyValueEntry(tcpRequest.Key, result) });
 
+                    case RequestType.GetInRange:
+                        var list = new List<KeyValueEntry>();
+                        await foreach(var item in storage.GetInRange(tcpRequest.Key, tcpRequest.Value))
+                        {
+                            list.Add(new KeyValueEntry(item.Key, item.Value));
+                        }
+                        return TcpResponse.SuccessGet(list);
+
                     default:
                         return TcpResponse.FailureResult();
                 }

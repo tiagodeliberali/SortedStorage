@@ -264,6 +264,9 @@ namespace SortedStorage.Application.SymbolTable
 
         public IEnumerable<Node<TKey, TValue>> GetInRange(TKey start, TKey end)
         {
+            if (root == null)
+                yield break;
+
             var visited = new HashSet<TKey>();
             var stack = new Stack<Node<TKey, TValue>>();
             stack.Push(root);

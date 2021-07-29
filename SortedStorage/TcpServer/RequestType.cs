@@ -4,6 +4,7 @@
     {
         Upsert,
         Remove,
-        Get
+        Get,
+        GetInRange
     }
 }

@@ -29,7 +29,7 @@ namespace SortedStorage.TcpClient
                 client = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
                 client.BeginConnect(remoteEP,
-                    new AsyncCallback(ConnectCallback), 
+                    new AsyncCallback(ConnectCallback),
                     client);
 
                 connectDone.WaitOne();
@@ -84,6 +84,8 @@ namespace SortedStorage.TcpClient
                 Socket client = (Socket)ar.AsyncState;
 
                 int bytesSent = client.EndSend(ar);
+                Console.WriteLine($"[{nameof(AsynchronousClient)}] Bytes sent: {bytesSent}");
+
                 sendDone.Set();
             }
             catch (Exception e)
@@ -113,6 +115,7 @@ namespace SortedStorage.TcpClient
                 Socket client = state.WorkSocket;
 
                 int bytesRead = client.EndReceive(ar);
+                Console.WriteLine($"[{nameof(AsynchronousClient)}] Bytes received: {bytesRead}");
                 if (bytesRead > 0)
                 {
                     state.ReceivedData.AddRange(state.Buffer.Take(bytesRead));
