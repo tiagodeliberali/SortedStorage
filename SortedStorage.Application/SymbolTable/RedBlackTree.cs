@@ -100,9 +100,8 @@ namespace SortedStorage.Application.SymbolTable
 
         internal static TValue Get<TKey, TValue>(this Node<TKey, TValue> node, TKey key)
             where TKey : IComparable
-            where TValue : class
         {
-            if (node == null) return null;
+            if (node == null) return default(TValue);
 
             int cmp = key.CompareTo(node.Key);
 
@@ -219,8 +218,7 @@ namespace SortedStorage.Application.SymbolTable
     }
 
     public class RedBlackTree<TKey, TValue>
-        where TKey : class, IComparable
-        where TValue : class
+        where TKey : class, IComparable        
     {
         private Node<TKey, TValue> root;
 
@@ -253,6 +251,8 @@ namespace SortedStorage.Application.SymbolTable
         }
 
         public bool IsEmpty() => Size == 0;
+
+        public void Clear() => root = null;
 
         public IEnumerable<Node<TKey, TValue>> GetAll()
         {

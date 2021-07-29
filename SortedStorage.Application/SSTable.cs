@@ -1,17 +1,19 @@
 ﻿using SortedStorage.Application.Port.Out;
+using SortedStorage.Application.SymbolTable;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace SortedStorage.Application
 {
+    // TODO: Merge can have optional parameter to remove deleted (tombstone) register
     public class SSTable : IDisposable
     {
         private readonly IFileReaderPort dataFile;
         private readonly IFileReaderPort indexFile;
-        private readonly Dictionary<string, long> index;
+        private readonly RedBlackTree<string, long?> index;
 
-        private SSTable(IFileReaderPort dataFile, IFileReaderPort indexFile, Dictionary<string, long> index)
+        private SSTable(IFileReaderPort dataFile, IFileReaderPort indexFile, RedBlackTree<string, long?> index)
         {
             this.dataFile = dataFile;
             this.indexFile = indexFile;
@@ -22,11 +24,10 @@ namespace SortedStorage.Application
 
         public async Task<string> Get(string key)
         {
-            if (!index.ContainsKey(key)) return null;
-
             var position = index[key];
+            if (!position.HasValue) return null;
 
-            dataFile.Position = position;
+            dataFile.Position = position.Value;
             var keyValue = await KeyValueEntry.FromFileReader(dataFile);
 
             return keyValue.Value;
@@ -42,13 +43,37 @@ namespace SortedStorage.Application
             }
         }
 
+        public async IAsyncEnumerable<KeyValuePair<string, string>> GetInRange(string start, string end)
+        {
+            var initialKey = index.GetCeiling(start);
+
+            if (initialKey == null) 
+                yield break;
+
+            var position = index[initialKey];
+
+            if (!position.HasValue)
+                yield break;
+
+            dataFile.Position = position.Value;
+            while (dataFile.HasContent())
+            {
+                var keyValue = await KeyValueEntry.FromFileReader(dataFile);
+
+                if (end.CompareTo(keyValue.Key) < 0)
+                    yield break;
+                
+                yield return KeyValuePair.Create(keyValue.Key, keyValue.Value);
+            }
+        }
+
         public async Task<SSTable> Merge(SSTable otherTable, IFileManagerPort fileManager)
         {
             PriorityEnumerator priorityEnumerator = new PriorityEnumerator(
                 new IAsyncEnumerable<KeyValuePair<string, string>>[] { GetAll(), otherTable.GetAll() });
 
             string filename = Guid.NewGuid().ToString();
-            Dictionary<string, long> index = new Dictionary<string, long>();
+            var index = new RedBlackTree<string, long?>();
 
             using (IFileWriterPort dataFile = fileManager.OpenOrCreateToWrite(filename, FileType.SSTableData))
             using (IFileWriterPort indexFile = fileManager.OpenOrCreateToWrite(filename, FileType.SSTableIndex))
@@ -68,7 +93,7 @@ namespace SortedStorage.Application
         public static async Task<SSTable> From(ImutableMemtable memtable, IFileManagerPort fileManager)
         {
             string filename = Guid.NewGuid().ToString();
-            Dictionary<string, long> index = new Dictionary<string, long>();
+            var index = new RedBlackTree<string, long?>();
 
             using (IFileWriterPort dataFile = fileManager.OpenOrCreateToWrite(filename, FileType.SSTableData))
             using (IFileWriterPort indexFile = fileManager.OpenOrCreateToWrite(filename, FileType.SSTableIndex))
@@ -87,7 +112,7 @@ namespace SortedStorage.Application
 
         public static async Task<SSTable> Load(IFileReaderPort indexFile, IFileReaderPort dataFile)
         {
-            Dictionary<string, long> index = new Dictionary<string, long>();
+            var index = new RedBlackTree<string, long?>();
 
             indexFile.Position = 0;
             while (indexFile.HasContent())
@@ -99,7 +124,7 @@ namespace SortedStorage.Application
             return new SSTable(dataFile, indexFile, index);
         }
 
-        private static async Task BuildFiles(IFileWriterPort dataFile, IFileWriterPort indexFile, KeyValuePair<string, string> keyValue, Dictionary<string, long> index)
+        private static async Task BuildFiles(IFileWriterPort dataFile, IFileWriterPort indexFile, KeyValuePair<string, string> keyValue, RedBlackTree<string, long?> index)
         {
             long position = await dataFile.Append(KeyValueEntry.ToBytes(keyValue.Key, keyValue.Value));
             index[keyValue.Key] = position;

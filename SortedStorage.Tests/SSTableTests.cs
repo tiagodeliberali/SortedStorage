@@ -111,6 +111,59 @@ namespace SortedStorage.Tests
             (await result.Get("key4")).Should().Be("value4-2");
         }
 
+        [Fact]
+        public async Task Get_range_when_keys_exist()
+        {
+            FileTestManagerAdapter fileManager = new FileTestManagerAdapter();
+
+            SSTable sstable = await BuildSSTableFromImutableMemtable(fileManager, new List<KeyValueEntry> {
+                new KeyValueEntry("key1", "value1"),
+                new KeyValueEntry("key2", "value2"),
+                new KeyValueEntry("key3", "value3"),
+                new KeyValueEntry("key4", "value4"),
+                new KeyValueEntry("key5", "value5"),
+                new KeyValueEntry("key6", "value6")
+            });
+
+            var enumerator = sstable.GetInRange("key3", "key5").GetAsyncEnumerator();
+
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
+            enumerator.Current.Key.Should().Be("key3");
+
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
+            enumerator.Current.Key.Should().Be("key4");
+
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
+            enumerator.Current.Key.Should().Be("key5");
+
+            (await enumerator.MoveNextAsync()).Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task Get_range_when_keys_do_not_exist()
+        {
+            FileTestManagerAdapter fileManager = new FileTestManagerAdapter();
+
+            SSTable sstable = await BuildSSTableFromImutableMemtable(fileManager, new List<KeyValueEntry> {
+                new KeyValueEntry("key11", "value1"),
+                new KeyValueEntry("key22", "value2"),
+                new KeyValueEntry("key33", "value3"),
+                new KeyValueEntry("key44", "value4"),
+                new KeyValueEntry("key55", "value5"),
+                new KeyValueEntry("key66", "value6")
+            });
+
+            var enumerator = sstable.GetInRange("key3", "key5").GetAsyncEnumerator();
+
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
+            enumerator.Current.Key.Should().Be("key33");
+
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
+            enumerator.Current.Key.Should().Be("key44");
+
+            (await enumerator.MoveNextAsync()).Should().BeFalse();
+        }
+
         private static async Task<SSTable> BuildSSTableFromImutableMemtable(IFileManagerPort fileManager, IEnumerable<KeyValueEntry> entries)
         {
             var file = fileManager.OpenOrCreateToWriteSingleFile(FileType.MemtableWriteAheadLog);

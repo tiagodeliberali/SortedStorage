@@ -141,5 +141,28 @@ namespace SortedStorage.Tests
 
             (await enumerator.MoveNextAsync()).Should().BeFalse();
         }
+
+        [Fact]
+        public async Task Get_information_inside_range_when_keys_do_not_exist()
+        {
+            FileTestWriterAdapter fileWriter = new FileTestWriterAdapter("test");
+            Memtable memtable = await Memtable.LoadFromFile(fileWriter);
+
+            memtable.Add("c1", "value c");
+            memtable.Add("e1", "value e");
+            memtable.Add("b1", "value b");
+            memtable.Add("d1", "value d");
+            memtable.Add("a1", "value a");
+
+            var enumerator = memtable.GetInRange("b", "d").GetAsyncEnumerator();
+
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
+            enumerator.Current.Key.Should().Be("b1");
+
+            (await enumerator.MoveNextAsync()).Should().BeTrue();
+            enumerator.Current.Key.Should().Be("c1");
+
+            (await enumerator.MoveNextAsync()).Should().BeFalse();
+        }
     }
 }
