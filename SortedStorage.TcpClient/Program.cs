@@ -11,7 +11,7 @@ namespace SortedStorage.TcpClient
     {
         public static void Main(string[] args)
         {
-            var client = new AsynchronousClient();
+            var client = new TcpClient();
             client.StartClient(GetServerIp(args.Length > 0 ? args[0] : null));
 
             while (true)
@@ -80,7 +80,7 @@ namespace SortedStorage.TcpClient
 
                 tasks.Add(Task.Run(() =>
                 {
-                    var client = new AsynchronousClient();
+                    var client = new TcpClient();
                     client.StartClient(ip);
 
                     DisplayResponse(client.Send(TcpRequest.Upsert(id, $"novo {id}")));

@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace SortedStorage.TcpClient
 {
-    public class AsynchronousClient
+    public class TcpClient
     {
         private readonly ManualResetEvent connectDone = new ManualResetEvent(false);
         private readonly ManualResetEvent sendDone = new ManualResetEvent(false);
@@ -32,7 +32,7 @@ namespace SortedStorage.TcpClient
             }
             catch (Exception e)
             {
-                Console.WriteLine($"[{nameof(AsynchronousClient)}] {e}");
+                Console.WriteLine($"[{nameof(TcpClient)}] {e}");
             }
         }
 
@@ -67,7 +67,7 @@ namespace SortedStorage.TcpClient
             }
             catch (Exception e)
             {
-                Console.WriteLine($"[{nameof(AsynchronousClient)}] {e}");
+                Console.WriteLine($"[{nameof(TcpClient)}] {e}");
             }
         }
 
@@ -80,13 +80,13 @@ namespace SortedStorage.TcpClient
                 Socket client = (Socket)ar.AsyncState;
 
                 int bytesSent = client.EndSend(ar);
-                Console.WriteLine($"[{nameof(AsynchronousClient)}] Bytes sent: {bytesSent}");
+                Console.WriteLine($"[{nameof(TcpClient)}] Bytes sent: {bytesSent}");
 
                 sendDone.Set();
             }
             catch (Exception e)
             {
-                Console.WriteLine($"[{nameof(AsynchronousClient)}] {e}");
+                Console.WriteLine($"[{nameof(TcpClient)}] {e}");
             }
         }
 
@@ -99,7 +99,7 @@ namespace SortedStorage.TcpClient
             }
             catch (Exception e)
             {
-                Console.WriteLine($"[{nameof(AsynchronousClient)}] {e}");
+                Console.WriteLine($"[{nameof(TcpClient)}] {e}");
             }
         }
 
@@ -111,7 +111,7 @@ namespace SortedStorage.TcpClient
                 Socket client = state.WorkSocket;
 
                 int bytesRead = client.EndReceive(ar);
-                Console.WriteLine($"[{nameof(AsynchronousClient)}] Bytes received: {bytesRead}");
+                Console.WriteLine($"[{nameof(TcpClient)}] Bytes received: {bytesRead}");
                 if (bytesRead > 0)
                 {
                     state.ReceivedData.AddRange(state.Buffer.Take(bytesRead));
@@ -129,7 +129,7 @@ namespace SortedStorage.TcpClient
             }
             catch (Exception e)
             {
-                Console.WriteLine($"[{nameof(AsynchronousClient)}] {e}");
+                Console.WriteLine($"[{nameof(TcpClient)}] {e}");
             }
         }
     }
