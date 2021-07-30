@@ -26,7 +26,7 @@ namespace SortedStorage.Tests
             FileTestWriterAdapter fileWriter = new FileTestWriterAdapter("test");
             Memtable memtable = await Memtable.LoadFromFile(fileWriter);
 
-            Assert.Throws<InvalidEntryValueException>(() => memtable.Add("key", StorageConfiguration.TOMBSTONE));
+            Assert.Throws<InvalidEntryValueException>(() => memtable.Add("key", StorageConfiguration.Tombstone));
         }
 
         [Fact]
@@ -38,7 +38,7 @@ namespace SortedStorage.Tests
             memtable.Add("key", "ação test");
             memtable.Remove("key");
 
-            memtable.Get("key").Should().Be(StorageConfiguration.TOMBSTONE);
+            memtable.Get("key").Should().Be(StorageConfiguration.Tombstone);
 
             var reader = fileWriter.GetReader();
             reader.Position = 0;
@@ -48,7 +48,7 @@ namespace SortedStorage.Tests
 
             KeyValueEntry entry2 = await KeyValueEntry.FromFileReader(reader);
             entry2.Key.Should().Be("key");
-            entry2.Value.Should().Be(StorageConfiguration.TOMBSTONE);
+            entry2.Value.Should().Be(StorageConfiguration.Tombstone);
         }
 
         [Fact]

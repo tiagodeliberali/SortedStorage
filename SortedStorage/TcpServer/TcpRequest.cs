@@ -38,36 +38,26 @@ namespace SortedStorage.TcpServer
 
         private static RequestType ParseType(ushort typeId)
         {
-            switch (typeId)
+            return typeId switch
             {
-                case 1:
-                    return RequestType.Get;
-                case 2:
-                    return RequestType.Remove;
-                case 4:
-                    return RequestType.Upsert;
-                case 8:
-                    return RequestType.GetInRange;
-                default:
-                    throw new InvalidCastException(nameof(typeId));
-            }
+                1 => RequestType.Get,
+                2 => RequestType.Remove,
+                4 => RequestType.Upsert,
+                8 => RequestType.GetInRange,
+                _ => throw new InvalidCastException(nameof(typeId)),
+            };
         }
 
         private ushort ParseType()
         {
-            switch (Type)
+            return Type switch
             {
-                case RequestType.Upsert:
-                    return 4;
-                case RequestType.Remove:
-                    return 2;
-                case RequestType.Get:
-                    return 1;
-                case RequestType.GetInRange:
-                    return 8;
-            }
-
-            throw new InvalidCastException(nameof(Type));
+                RequestType.Upsert => 4,
+                RequestType.Remove => 2,
+                RequestType.Get => 1,
+                RequestType.GetInRange => 8,
+                _ => throw new InvalidCastException(nameof(Type)),
+            };
         }
 
         public byte[] ToBytes()

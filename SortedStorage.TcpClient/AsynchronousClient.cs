@@ -9,22 +9,18 @@ namespace SortedStorage.TcpClient
 {
     public class AsynchronousClient
     {
-        private const int port = 8080;
-
-        private ManualResetEvent connectDone = new ManualResetEvent(false);
-        private ManualResetEvent sendDone = new ManualResetEvent(false);
-        private ManualResetEvent receiveDone = new ManualResetEvent(false);
+        private readonly ManualResetEvent connectDone = new ManualResetEvent(false);
+        private readonly ManualResetEvent sendDone = new ManualResetEvent(false);
+        private readonly ManualResetEvent receiveDone = new ManualResetEvent(false);
 
         private Socket client;
         private TcpResponse response;
 
-        public void StartClient()
+        public void StartClient(IPAddress ipAddress)
         {
             try
             {
-                IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-                IPAddress ipAddress = ipHostInfo.AddressList[0];
-                IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
+                IPEndPoint remoteEP = new IPEndPoint(ipAddress, TcpConfiguration.ServicePort);
 
                 client = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
@@ -99,7 +95,7 @@ namespace SortedStorage.TcpClient
             try
             {
                 TcpStateObject state = new TcpStateObject(client);
-                client.BeginReceive(state.Buffer, 0, TcpStateObject.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
+                client.BeginReceive(state.Buffer, 0, TcpConfiguration.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
             }
             catch (Exception e)
             {
@@ -127,7 +123,7 @@ namespace SortedStorage.TcpClient
                     }
                     else
                     {
-                        client.BeginReceive(state.Buffer, 0, TcpStateObject.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
+                        client.BeginReceive(state.Buffer, 0, TcpConfiguration.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
                     }
                 }
             }

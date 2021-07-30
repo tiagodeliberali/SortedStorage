@@ -47,7 +47,7 @@ namespace SortedStorage.Application
         {
             var initialKey = index.GetCeiling(start);
 
-            if (initialKey == null) 
+            if (initialKey == null)
                 yield break;
 
             var position = index[initialKey];
@@ -62,7 +62,7 @@ namespace SortedStorage.Application
 
                 if (end.CompareTo(keyValue.Key) < 0)
                     yield break;
-                
+
                 yield return KeyValuePair.Create(keyValue.Key, keyValue.Value);
             }
         }

@@ -36,7 +36,7 @@ namespace SortedStorage.TcpServer
 
                     case RequestType.GetInRange:
                         var list = new List<KeyValueEntry>();
-                        await foreach(var item in storage.GetInRange(tcpRequest.Key, tcpRequest.Value))
+                        await foreach (var item in storage.GetInRange(tcpRequest.Key, tcpRequest.Value))
                         {
                             list.Add(new KeyValueEntry(item.Key, item.Value));
                         }

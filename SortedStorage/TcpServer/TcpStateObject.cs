@@ -5,8 +5,6 @@ namespace SortedStorage.TcpServer
 {
     public class TcpStateObject
     {
-        public const int BufferSize = 1024;
-
         public byte[] Buffer { get; private set; }
         public List<byte> ReceivedData { get; }
         public Socket WorkSocket { get; }
@@ -14,7 +12,7 @@ namespace SortedStorage.TcpServer
         public TcpStateObject(Socket workSocket)
         {
             WorkSocket = workSocket;
-            Buffer = new byte[BufferSize];
+            Buffer = new byte[TcpConfiguration.BufferSize];
             ReceivedData = new List<byte>();
         }
 
@@ -26,7 +24,7 @@ namespace SortedStorage.TcpServer
 
         public void Clear()
         {
-            Buffer = new byte[BufferSize];
+            Buffer = new byte[TcpConfiguration.BufferSize];
             ReceivedData.Clear();
         }
     }

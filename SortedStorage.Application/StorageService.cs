@@ -37,6 +37,7 @@ namespace SortedStorage.Application
         public static async Task<StorageService> LoadFromFiles(IFileManagerPort fileManager)
         {
             Console.WriteLine($"[{nameof(StorageService)}] Starting database...");
+            var stopwatch = Stopwatch.StartNew();
             var service = new StorageService(fileManager)
             {
                 mainMemtable = await Memtable.LoadFromFile(fileManager.OpenOrCreateToWriteSingleFile(FileType.MemtableWriteAheadLog))
@@ -44,8 +45,8 @@ namespace SortedStorage.Application
 
             await service.LoadSSTables();
             await service.LoadPendingTransferTable();
-            Console.WriteLine($"[{nameof(StorageService)}] Database started!");
-
+            stopwatch.Stop();
+            Console.WriteLine($"[{nameof(StorageService)}] Database started in {stopwatch.ElapsedMilliseconds} ms");
             return service;
         }
 
@@ -96,7 +97,7 @@ namespace SortedStorage.Application
         /// </summary>
         public async Task TransferMemtableToSSTable()
         {
-            if (mainMemtable.IsFull() && !isTransferingMemtable)
+            if (mainMemtable.Size > StorageConfiguration.MaxMemtableSize && !isTransferingMemtable)
                 await StoreMainMemtable();
         }
 
@@ -127,10 +128,12 @@ namespace SortedStorage.Application
         private async Task ConvertTransferMemtableToSSTable()
         {
             Console.WriteLine($"[{nameof(StorageService)}] transfer table started for file {transferMemtable.GetFileName()}");
+            var stopwatch = Stopwatch.StartNew();
             sstables.AddFirst(await SSTable.From(transferMemtable, fileManager));
             transferMemtable.Delete();
             transferMemtable = null;
-            Console.WriteLine($"[{nameof(StorageService)}] transfer table completed");
+            stopwatch.Stop();
+            Console.WriteLine($"[{nameof(StorageService)}] transfer table completed in {stopwatch.ElapsedMilliseconds} ms");
         }
 
         /// <summary>
@@ -142,6 +145,7 @@ namespace SortedStorage.Application
             if (sstables.Count > 2)
             {
                 Console.WriteLine($"[{nameof(StorageService)}] merge tables started");
+                var stopwatch = Stopwatch.StartNew();
                 SSTable older = sstables.Last.Value;
                 SSTable newer = sstables.Last.Previous.Value;
 
@@ -151,7 +155,8 @@ namespace SortedStorage.Application
                 sstables.Remove(sstables.Last.Previous);
                 older.Delete();
                 newer.Delete();
-                Console.WriteLine($"[{nameof(StorageService)}] merge tables completed with file {result.GetFileName()}");
+                stopwatch.Stop();
+                Console.WriteLine($"[{nameof(StorageService)}] merge tables completed with file {result.GetFileName()} in {stopwatch.ElapsedMilliseconds} ms");
             }
         }
 
@@ -176,7 +181,7 @@ namespace SortedStorage.Application
             stopwatch.Stop();
             SortedStorageApplicationEventSource.Log.ReportGetDurationInMs(stopwatch.Elapsed.Ticks);
 
-            return result == StorageConfiguration.TOMBSTONE
+            return result == StorageConfiguration.Tombstone
                 ? null
                 : result;
         }

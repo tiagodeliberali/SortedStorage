@@ -8,11 +8,12 @@ namespace SortedStorage.Application
 {
     public class Memtable : IDisposable
     {
-        private const int MAX_SIZE = 2;
         private readonly RedBlackTree<string, string> sortedDictionary = new RedBlackTree<string, string>();
         private readonly IFileWriterPort file;
 
         private bool isReadOnly = false;
+
+        public int Size => sortedDictionary.Size;
 
         private Memtable(IFileWriterPort file)
         {
@@ -37,17 +38,15 @@ namespace SortedStorage.Application
             }
         }
 
-        public bool IsFull() => sortedDictionary.Size >= MAX_SIZE;
-
         public void Add(string key, string value)
         {
-            if (value == StorageConfiguration.TOMBSTONE)
+            if (value == StorageConfiguration.Tombstone)
                 throw new InvalidEntryValueException($"Invalid value '{value}'. It is used as tombstone.");
 
             AddEntryWithLock(key, value);
         }
 
-        public void Remove(string key) => AddEntryWithLock(key, StorageConfiguration.TOMBSTONE);
+        public void Remove(string key) => AddEntryWithLock(key, StorageConfiguration.Tombstone);
 
         private void AddEntryWithLock(string key, string value)
         {

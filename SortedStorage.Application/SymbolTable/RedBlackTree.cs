@@ -50,7 +50,7 @@ namespace SortedStorage.Application.SymbolTable
             if (floor != null) return floor;
             return node;
         }
-        
+
         internal static Node<TKey, TValue> GetCeiling<TKey, TValue>(this Node<TKey, TValue> node, TKey key)
             where TKey : IComparable
         {
@@ -91,8 +91,8 @@ namespace SortedStorage.Application.SymbolTable
             if (cmp > 0)
             {
                 var result = node.Right.Rank(key);
-                return result == -1 
-                    ? -1 
+                return result == -1
+                    ? -1
                     : 1 + node.Left.GetSize() + result;
             }
             return node.Left.GetSize();
@@ -101,7 +101,7 @@ namespace SortedStorage.Application.SymbolTable
         internal static TValue Get<TKey, TValue>(this Node<TKey, TValue> node, TKey key)
             where TKey : IComparable
         {
-            if (node == null) return default(TValue);
+            if (node == null) return default;
 
             int cmp = key.CompareTo(node.Key);
 
@@ -113,7 +113,7 @@ namespace SortedStorage.Application.SymbolTable
         internal static Node<TKey, TValue> Add<TKey, TValue>(this Node<TKey, TValue> node, TKey key, TValue value)
             where TKey : IComparable
         {
-            if (node == null) 
+            if (node == null)
                 return new Node<TKey, TValue>(key, value, 1, true);
 
             int cmp = key.CompareTo(node.Key);
@@ -125,7 +125,7 @@ namespace SortedStorage.Application.SymbolTable
             if (IsRed(node?.Right) && !IsRed(node?.Left))
                 node = node.RotateLeft();
 
-            if (IsRed(node?.Left) && IsRed(node?.Left?.Left)) 
+            if (IsRed(node?.Left) && IsRed(node?.Left?.Left))
                 node = node.RotateRight();
 
             if (IsRed(node?.Left) && IsRed(node?.Right))
@@ -218,7 +218,7 @@ namespace SortedStorage.Application.SymbolTable
     }
 
     public class RedBlackTree<TKey, TValue>
-        where TKey : class, IComparable        
+        where TKey : class, IComparable
     {
         private Node<TKey, TValue> root;
 

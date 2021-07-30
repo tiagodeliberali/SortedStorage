@@ -10,13 +10,13 @@ namespace SortedStorage
 {
     class Program
     {
-        private static readonly EventCounterCollectionModule _events = new EventCounterCollectionModule();
+        private static readonly EventCounterCollectionModule events = new EventCounterCollectionModule();
 
         static async Task Main(string[] args)
         {
             if (args.Length < 2)
             {
-                throw new ArgumentException("Should pass path and InstrumentationKey as parameters");
+                throw new ArgumentException("Should pass Path and InstrumentationKey as parameters");
             }
 
             SetupTelemetry(args[1]);
@@ -55,19 +55,19 @@ namespace SortedStorage
 
         private static void SetupTelemetry(string instrumentationKey)
         {
-            _events.Counters.Add(new EventCounterCollectionRequest(nameof(TcpServiceEventSource), "newClientsCounter"));
-            _events.Counters.Add(new EventCounterCollectionRequest(nameof(TcpServiceEventSource), "readBytesCounter"));
-            _events.Counters.Add(new EventCounterCollectionRequest(nameof(TcpServiceEventSource), "writeBytesCounter"));
+            events.Counters.Add(new EventCounterCollectionRequest(nameof(TcpServiceEventSource), "newClientsCounter"));
+            events.Counters.Add(new EventCounterCollectionRequest(nameof(TcpServiceEventSource), "readBytesCounter"));
+            events.Counters.Add(new EventCounterCollectionRequest(nameof(TcpServiceEventSource), "writeBytesCounter"));
 
-            _events.Counters.Add(new EventCounterCollectionRequest(nameof(SortedStorageApplicationEventSource), "updateDurationCounter"));
-            _events.Counters.Add(new EventCounterCollectionRequest(nameof(SortedStorageApplicationEventSource), "getDurationCounter"));
+            events.Counters.Add(new EventCounterCollectionRequest(nameof(SortedStorageApplicationEventSource), "updateDurationCounter"));
+            events.Counters.Add(new EventCounterCollectionRequest(nameof(SortedStorageApplicationEventSource), "getDurationCounter"));
 
 
             TelemetryConfiguration configuration = TelemetryConfiguration.CreateDefault();
 
             configuration.InstrumentationKey = instrumentationKey;
 
-            _events.Initialize(configuration);
+            events.Initialize(configuration);
         }
     }
 }

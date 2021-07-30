@@ -7,9 +7,9 @@ namespace SortedStorage.TcpServer
     {
         public static TcpServiceEventSource Log = new TcpServiceEventSource();
 
-        private IncrementingEventCounter newClientsCounter;
-        private IncrementingEventCounter readBytesCounter;
-        private IncrementingEventCounter writeBytesCounter;
+        private readonly IncrementingEventCounter newClientsCounter;
+        private readonly IncrementingEventCounter readBytesCounter;
+        private readonly IncrementingEventCounter writeBytesCounter;
 
         public TcpServiceEventSource()
         {

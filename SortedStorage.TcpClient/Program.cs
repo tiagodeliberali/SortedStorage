@@ -2,16 +2,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace SortedStorage.TcpClient
 {
     class Program
     {
-        public static void Main(String[] args)
+        public static void Main(string[] args)
         {
             var client = new AsynchronousClient();
-            client.StartClient();
+            client.StartClient(GetServerIp(args.Length > 0 ? args[0] : null));
 
             while (true)
             {
@@ -48,6 +49,17 @@ namespace SortedStorage.TcpClient
             Console.WriteLine("bye!!");
         }
 
+        private static IPAddress GetServerIp(string ip = null)
+        {
+            if (ip == null)
+            {
+                IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
+                return ipHostInfo.AddressList[0];
+            }
+
+            return IPAddress.Parse(ip);
+        }
+
         private static void DisplayResponse(TcpResponse tcpResponse)
         {
             Console.WriteLine($"[{nameof(Main)}] Success: {tcpResponse.Success} with {tcpResponse.Entries.Count()} enties...");
@@ -57,7 +69,7 @@ namespace SortedStorage.TcpClient
             }
         }
 
-        private static void RunRandomTests()
+        private static void RunRandomTests(IPAddress ip)
         {
             var r = new Random();
             var tasks = new List<Task>();
@@ -69,7 +81,7 @@ namespace SortedStorage.TcpClient
                 tasks.Add(Task.Run(() =>
                 {
                     var client = new AsynchronousClient();
-                    client.StartClient();
+                    client.StartClient(ip);
 
                     DisplayResponse(client.Send(TcpRequest.Upsert(id, $"novo {id}")));
                     DisplayResponse(client.Send(TcpRequest.Get(id)));

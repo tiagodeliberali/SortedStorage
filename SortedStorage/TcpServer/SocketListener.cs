@@ -20,7 +20,7 @@ namespace SortedStorage.TcpServer
         {
             IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
             IPAddress ipAddress = ipHostInfo.AddressList[0];
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 8080);
+            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, TcpConfiguration.ServicePort);
 
             Socket listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
@@ -55,7 +55,7 @@ namespace SortedStorage.TcpServer
                 Socket handler = listener.EndAccept(ar);
 
                 TcpStateObject state = new TcpStateObject(handler);
-                state.WorkSocket.BeginReceive(state.Buffer, 0, TcpStateObject.BufferSize, 0, new AsyncCallback(ReadCallback), state);
+                state.WorkSocket.BeginReceive(state.Buffer, 0, TcpConfiguration.BufferSize, 0, new AsyncCallback(ReadCallback), state);
             }
             catch (Exception e)
             {
@@ -84,7 +84,7 @@ namespace SortedStorage.TcpServer
                         Send(handler, response.ToBytes());
                     }
 
-                    handler.BeginReceive(state.Buffer, 0, TcpStateObject.BufferSize, 0, new AsyncCallback(ReadCallback), state);
+                    handler.BeginReceive(state.Buffer, 0, TcpConfiguration.BufferSize, 0, new AsyncCallback(ReadCallback), state);
                 }
             }
             catch (Exception e)
