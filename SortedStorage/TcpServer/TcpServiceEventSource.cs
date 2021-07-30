@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.Tracing;
+﻿using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 
 namespace SortedStorage.TcpServer
 {
@@ -8,7 +9,7 @@ namespace SortedStorage.TcpServer
         public static TcpServiceEventSource Log = new TcpServiceEventSource();
 
         private readonly IncrementingEventCounter newClientsCounter;
-        private readonly IncrementingEventCounter readBytesCounter;
+        private readonly IncrementingEventCounter receivedBytesCounter;
         private readonly IncrementingEventCounter writeBytesCounter;
 
         public TcpServiceEventSource()
@@ -19,9 +20,9 @@ namespace SortedStorage.TcpServer
                 DisplayUnits = "un"
             };
 
-            readBytesCounter = new IncrementingEventCounter(nameof(readBytesCounter), this)
+            receivedBytesCounter = new IncrementingEventCounter(nameof(receivedBytesCounter), this)
             {
-                DisplayName = "Read data",
+                DisplayName = "Received data",
                 DisplayUnits = "byte"
             };
 
@@ -37,14 +38,21 @@ namespace SortedStorage.TcpServer
             newClientsCounter.Increment();
         }
 
-        public void IncrementReadBytes(int bytes)
+        public void IncrementReceivedBytes(int bytes)
         {
-            readBytesCounter.Increment(bytes);
+            receivedBytesCounter.Increment(bytes);
         }
 
         public void IncrementSentBytes(int bytes)
         {
             writeBytesCounter.Increment(bytes);
+        }
+
+        internal static IEnumerable<KeyValuePair<string, string>> GetEvents()
+        {
+            yield return KeyValuePair.Create(nameof(TcpServiceEventSource), nameof(newClientsCounter));
+            yield return KeyValuePair.Create(nameof(TcpServiceEventSource), nameof(receivedBytesCounter));
+            yield return KeyValuePair.Create(nameof(TcpServiceEventSource), nameof(writeBytesCounter));
         }
     }
 }

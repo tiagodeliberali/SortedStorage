@@ -55,7 +55,7 @@ namespace SortedStorage.TcpServer
                 Socket handler = listener.EndAccept(ar);
 
                 TcpStateObject state = new TcpStateObject(handler);
-                state.WorkSocket.BeginReceive(state.Buffer, 0, TcpConfiguration.BufferSize, 0, new AsyncCallback(ReadCallback), state);
+                state.WorkSocket.BeginReceive(state.Buffer, 0, TcpConfiguration.BufferSize, 0, new AsyncCallback(ReceiveDataCallback), state);
             }
             catch (Exception e)
             {
@@ -63,18 +63,18 @@ namespace SortedStorage.TcpServer
             }
         }
 
-        public async void ReadCallback(IAsyncResult ar)
+        public async void ReceiveDataCallback(IAsyncResult ar)
         {
             try
             {
                 TcpStateObject state = (TcpStateObject)ar.AsyncState;
                 Socket handler = state.WorkSocket;
 
-                int bytesRead = handler.EndReceive(ar);
-                if (bytesRead > 0)
+                int receivedBytes = handler.EndReceive(ar);
+                if (receivedBytes > 0)
                 {
-                    TcpServiceEventSource.Log.IncrementReadBytes(bytesRead);
-                    state.ReceivedData.AddRange(state.Buffer.Take(bytesRead));
+                    TcpServiceEventSource.Log.IncrementReceivedBytes(receivedBytes);
+                    state.ReceivedData.AddRange(state.Buffer.Take(receivedBytes));
 
                     if (state.ReceivedAllData())
                     {
@@ -84,7 +84,7 @@ namespace SortedStorage.TcpServer
                         Send(handler, response.ToBytes());
                     }
 
-                    handler.BeginReceive(state.Buffer, 0, TcpConfiguration.BufferSize, 0, new AsyncCallback(ReadCallback), state);
+                    handler.BeginReceive(state.Buffer, 0, TcpConfiguration.BufferSize, 0, new AsyncCallback(ReceiveDataCallback), state);
                 }
             }
             catch (Exception e)
@@ -104,8 +104,8 @@ namespace SortedStorage.TcpServer
             {
                 Socket handler = (Socket)ar.AsyncState;
 
-                int bytesSent = handler.EndSend(ar);
-                TcpServiceEventSource.Log.IncrementSentBytes(bytesSent);
+                int sentBytes = handler.EndSend(ar);
+                TcpServiceEventSource.Log.IncrementSentBytes(sentBytes);
             }
             catch (Exception e)
             {

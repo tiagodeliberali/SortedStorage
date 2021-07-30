@@ -55,13 +55,15 @@ namespace SortedStorage
 
         private static void SetupTelemetry(string instrumentationKey)
         {
-            events.Counters.Add(new EventCounterCollectionRequest(nameof(TcpServiceEventSource), "newClientsCounter"));
-            events.Counters.Add(new EventCounterCollectionRequest(nameof(TcpServiceEventSource), "readBytesCounter"));
-            events.Counters.Add(new EventCounterCollectionRequest(nameof(TcpServiceEventSource), "writeBytesCounter"));
+            foreach (var item in TcpServiceEventSource.GetEvents())
+            {
+                events.Counters.Add(new EventCounterCollectionRequest(item.Key, item.Value));
+            }
 
-            events.Counters.Add(new EventCounterCollectionRequest(nameof(SortedStorageApplicationEventSource), "updateDurationCounter"));
-            events.Counters.Add(new EventCounterCollectionRequest(nameof(SortedStorageApplicationEventSource), "getDurationCounter"));
-
+            foreach (var item in SortedStorageApplicationEventSource.GetEvents())
+            {
+                events.Counters.Add(new EventCounterCollectionRequest(item.Key, item.Value));
+            }
 
             TelemetryConfiguration configuration = TelemetryConfiguration.CreateDefault();
 

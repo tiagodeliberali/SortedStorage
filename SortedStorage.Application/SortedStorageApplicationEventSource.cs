@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.Tracing;
+﻿using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 
 namespace SortedStorage.Application
 {
@@ -33,6 +34,12 @@ namespace SortedStorage.Application
         public void ReportGetDurationInMs(double ticks)
         {
             getDurationCounter.WriteMetric(ticks);
+        }
+
+        public static IEnumerable<KeyValuePair<string, string>> GetEvents()
+        {
+            yield return KeyValuePair.Create(nameof(SortedStorageApplicationEventSource), nameof(updateDurationCounter));
+            yield return KeyValuePair.Create(nameof(SortedStorageApplicationEventSource), nameof(getDurationCounter));
         }
     }
 }
