@@ -1,10 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿namespace SortedStorage.Application.Port.Out;
 
-namespace SortedStorage.Application.Port.Out
+using System.Threading.Tasks;
+
+public interface IFileWriterPort : IFileReaderPort
 {
-    public interface IFileWriterPort : IFileReaderPort
-    {
-        Task<long> Append(byte[] keyValue);
-        IFileReaderPort ToReadOnly(FileType destinationType);
-    }
+    Task<long> Append(byte[] keyValue);
+    IFileReaderPort ToReadOnly(FileType destinationType);
 }

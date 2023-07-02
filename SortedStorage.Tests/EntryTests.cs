@@ -1,52 +1,54 @@
+namespace SortedStorage.Tests;
+
 using FluentAssertions;
+
 using SortedStorage.Application;
 using SortedStorage.Tests.Adapter.Out;
+
 using System;
 using System.Text;
 using System.Threading.Tasks;
+
 using Xunit;
 
-namespace SortedStorage.Tests
+public class EntryTests
 {
-    public class EntryTests
+    [Fact]
+    public void Keyvalue_build_byte_array()
     {
-        [Fact]
-        public void Keyvalue_build_byte_array()
-        {
-            KeyValueEntry keyValue = new KeyValueEntry("key", "ação");
+        KeyValueEntry keyValue = new KeyValueEntry("key", "ação");
 
-            byte[] data = keyValue.ToBytes();
+        byte[] data = keyValue.ToBytes();
 
-            BitConverter.ToUInt32(data, 0).Should().Be(keyValue.GetCrc32());
-            BitConverter.ToInt32(data, 4).Should().Be(3);
-            BitConverter.ToInt32(data, 8).Should().Be(6);
-            Encoding.UTF8.GetString(data, 12, 9).Should().Be("keyação");
-        }
+        BitConverter.ToUInt32(data, 0).Should().Be(keyValue.GetCrc32());
+        BitConverter.ToInt32(data, 4).Should().Be(3);
+        BitConverter.ToInt32(data, 8).Should().Be(6);
+        Encoding.UTF8.GetString(data, 12, 9).Should().Be("keyação");
+    }
 
-        [Fact]
-        public async Task Keyvalue_build_from_file_reader()
-        {
-            FileTestReaderAdapter fileReader = new FileTestReaderAdapter("test");
-            KeyValueEntry keyValue = new KeyValueEntry("key", "ação");
-            fileReader.LoadForTest(keyValue.ToBytes());
+    [Fact]
+    public async Task Keyvalue_build_from_file_reader()
+    {
+        FileTestReaderAdapter fileReader = new FileTestReaderAdapter("test");
+        KeyValueEntry keyValue = new KeyValueEntry("key", "ação");
+        fileReader.LoadForTest(keyValue.ToBytes());
 
-            fileReader.Position = 0;
-            KeyValueEntry result = await KeyValueEntry.FromFileReader(fileReader);
+        fileReader.Position = 0;
+        KeyValueEntry result = await KeyValueEntry.FromFileReader(fileReader);
 
-            result.Key.Should().Be("key");
-            result.Value.Should().Be("ação");
-        }
+        result.Key.Should().Be("key");
+        result.Value.Should().Be("ação");
+    }
 
-        [Fact]
-        public void Indice_buid_from_byte_array()
-        {
-            IndexEntry index = new IndexEntry("ação", 123456789);
+    [Fact]
+    public void Indice_buid_from_byte_array()
+    {
+        IndexEntry index = new IndexEntry("ação", 123456789);
 
-            byte[] data = index.ToBytes();
+        byte[] data = index.ToBytes();
 
-            BitConverter.ToInt64(data, 0).Should().Be(123456789);
-            BitConverter.ToInt32(data, 8).Should().Be(6);
-            Encoding.UTF8.GetString(data, 12, 6).Should().Be("ação");
-        }
+        BitConverter.ToInt64(data, 0).Should().Be(123456789);
+        BitConverter.ToInt32(data, 8).Should().Be(6);
+        Encoding.UTF8.GetString(data, 12, 6).Should().Be("ação");
     }
 }

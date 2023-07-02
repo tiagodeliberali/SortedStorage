@@ -1,25 +1,24 @@
-﻿using System;
+﻿namespace SortedStorage.Application;
+
+using System;
 using System.Runtime.Serialization;
 
-namespace SortedStorage.Application
+[Serializable]
+public class MoreThanOneOfTypeException : Exception
 {
-    [Serializable]
-    public class MoreThanOneOfTypeException : Exception
+    public MoreThanOneOfTypeException()
     {
-        public MoreThanOneOfTypeException()
-        {
-        }
+    }
 
-        public MoreThanOneOfTypeException(string message) : base(message)
-        {
-        }
+    public MoreThanOneOfTypeException(string message) : base(message)
+    {
+    }
 
-        public MoreThanOneOfTypeException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
+    public MoreThanOneOfTypeException(string message, Exception innerException) : base(message, innerException)
+    {
+    }
 
-        protected MoreThanOneOfTypeException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
+    protected MoreThanOneOfTypeException(SerializationInfo info, StreamingContext context) : base(info, context)
+    {
     }
 }

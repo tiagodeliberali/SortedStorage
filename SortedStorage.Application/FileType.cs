@@ -1,10 +1,9 @@
-﻿namespace SortedStorage.Application
+﻿namespace SortedStorage.Application;
+
+public enum FileType
 {
-    public enum FileType
-    {
-        MemtableWriteAheadLog,
-        MemtableReadOnly,
-        SSTableData,
-        SSTableIndex
-    }
+    MemtableWriteAheadLog,
+    MemtableReadOnly,
+    SSTableData,
+    SSTableIndex
 }

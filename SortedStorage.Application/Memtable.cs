@@ -1,96 +1,96 @@
-﻿using SortedStorage.Application.Port.Out;
+﻿namespace SortedStorage.Application;
+
+using SortedStorage.Application.Port.Out;
 using SortedStorage.Application.SymbolTable;
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace SortedStorage.Application
+public class Memtable : IDisposable
 {
-    public class Memtable : IDisposable
+    private readonly RedBlackTree<string, string> sortedDictionary = new RedBlackTree<string, string>();
+    private readonly IFileWriterPort file;
+
+    private bool isReadOnly = false;
+
+    public int Size => sortedDictionary.Size;
+
+    private Memtable(IFileWriterPort file)
     {
-        private readonly RedBlackTree<string, string> sortedDictionary = new RedBlackTree<string, string>();
-        private readonly IFileWriterPort file;
+        this.file = file;
+    }
 
-        private bool isReadOnly = false;
+    public static async Task<Memtable> LoadFromFile(IFileWriterPort file)
+    {
+        var memtable = new Memtable(file);
+        await memtable.LoadFile();
 
-        public int Size => sortedDictionary.Size;
+        return memtable;
+    }
 
-        private Memtable(IFileWriterPort file)
+    private async Task LoadFile()
+    {
+        file.Position = 0;
+        while (file.HasContent())
         {
-            this.file = file;
+            KeyValueEntry entry = await KeyValueEntry.FromFileReader(file);
+            sortedDictionary[entry.Key] = entry.Value;
         }
+    }
 
-        public static async Task<Memtable> LoadFromFile(IFileWriterPort file)
+    public void Add(string key, string value)
+    {
+        if (value == StorageConfiguration.Tombstone)
+            throw new InvalidEntryValueException($"Invalid value '{value}'. It is used as tombstone.");
+
+        AddEntryWithLock(key, value);
+    }
+
+    public void Remove(string key) => AddEntryWithLock(key, StorageConfiguration.Tombstone);
+
+    private void AddEntryWithLock(string key, string value)
+    {
+        lock (file)
         {
-            var memtable = new Memtable(file);
-            await memtable.LoadFile();
+            if (isReadOnly)
+                throw new InvalidWriteToReadOnlyException("Tried to add entry to read only memtable");
 
-            return memtable;
+            file.Append(KeyValueEntry.ToBytes(key, value));
+            sortedDictionary[key] = value;
         }
+    }
 
-        private async Task LoadFile()
+    public string Get(string key) => sortedDictionary.Get(key);
+
+    public IEnumerable<KeyValuePair<string, string>> GetData()
+    {
+        foreach (var item in sortedDictionary.GetAll())
         {
-            file.Position = 0;
-            while (file.HasContent())
-            {
-                KeyValueEntry entry = await KeyValueEntry.FromFileReader(file);
-                sortedDictionary[entry.Key] = entry.Value;
-            }
+            yield return KeyValuePair.Create(item.Key, item.Value);
         }
+    }
 
-        public void Add(string key, string value)
+    public async IAsyncEnumerable<KeyValuePair<string, string>> GetInRange(string start, string end)
+    {
+        foreach (var item in sortedDictionary.GetInRange(start, end))
         {
-            if (value == StorageConfiguration.Tombstone)
-                throw new InvalidEntryValueException($"Invalid value '{value}'. It is used as tombstone.");
-
-            AddEntryWithLock(key, value);
+            yield return await Task.FromResult(KeyValuePair.Create(item.Key, item.Value));
         }
+    }
 
-        public void Remove(string key) => AddEntryWithLock(key, StorageConfiguration.Tombstone);
+    public void DeleteFile() => file?.Delete();
 
-        private void AddEntryWithLock(string key, string value)
+    public string GetFileName() => file.Name;
+
+    public void Dispose() => file?.Dispose();
+
+    public ImutableMemtable ToImutable()
+    {
+        lock (file)
         {
-            lock (file)
-            {
-                if (isReadOnly)
-                    throw new InvalidWriteToReadOnlyException("Tried to add entry to read only memtable");
-
-                file.Append(KeyValueEntry.ToBytes(key, value));
-                sortedDictionary[key] = value;
-            }
-        }
-
-        public string Get(string key) => sortedDictionary.Get(key);
-
-        public IEnumerable<KeyValuePair<string, string>> GetData()
-        {
-            foreach (var item in sortedDictionary.GetAll())
-            {
-                yield return KeyValuePair.Create(item.Key, item.Value);
-            }
-        }
-
-        public async IAsyncEnumerable<KeyValuePair<string, string>> GetInRange(string start, string end)
-        {
-            foreach (var item in sortedDictionary.GetInRange(start, end))
-            {
-                yield return await Task.FromResult(KeyValuePair.Create(item.Key, item.Value));
-            }
-        }
-
-        public void DeleteFile() => file?.Delete();
-
-        public string GetFileName() => file.Name;
-
-        public void Dispose() => file?.Dispose();
-
-        public ImutableMemtable ToImutable()
-        {
-            lock (file)
-            {
-                isReadOnly = true;
-                return new ImutableMemtable(file.ToReadOnly(FileType.MemtableReadOnly), sortedDictionary);
-            }
+            isReadOnly = true;
+            return new ImutableMemtable(file.ToReadOnly(FileType.MemtableReadOnly), sortedDictionary);
         }
     }
 }

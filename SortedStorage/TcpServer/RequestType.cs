@@ -1,10 +1,9 @@
-﻿namespace SortedStorage.TcpServer
+﻿namespace SortedStorage.TcpServer;
+
+public enum RequestType
 {
-    public enum RequestType
-    {
-        Upsert,
-        Remove,
-        Get,
-        GetInRange
-    }
+    Upsert,
+    Remove,
+    Get,
+    GetInRange
 }
